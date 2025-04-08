@@ -14,13 +14,20 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid role selected" });
     }
 
-    const userExists = await User.findOne({ email });
-    if (userExists) {
-      return res.status(409).json({ message: "User already exists" });
+    let user = await User.findOne({ email });
+
+    // if User exists , just return token and details (like a login)
+    if (user) {
+      return res.status(200).json({
+        message: "User already exists. Logged in successfully.",
+        token: generateToken(user._id),
+        user: { id: user._id, email: user.email, role: user.role },
+      });
     }
 
+    // If user doesn't exist, register new user
     const hashedPassword = await hashPassword(password);
-    const user = await User.create({ email, password: hashedPassword, role });
+    user = await User.create({ email, password: hashedPassword, role });
 
     res.status(201).json({
       message: "Registration successful",
