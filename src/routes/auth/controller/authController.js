@@ -1,5 +1,5 @@
 import User from "../../../models/User.js";
-import { hashPassword } from "../../../utils/bcryptUtils.js";
+import { hashPassword, comparePassword } from "../../../utils/bcryptUtils.js";
 import generateToken from "../../../utils/generateToken.js";
 
 export const registerUser = async (req, res) => {
@@ -16,8 +16,14 @@ export const registerUser = async (req, res) => {
 
     let user = await User.findOne({ email });
 
-    // if User exists , just return token and details (like a login)
+    // If user exists, check password
     if (user) {
+      const isPasswordMatch = await comparePassword(password, user.password);
+
+      if (!isPasswordMatch) {
+        return res.status(401).json({ message: "Password not matched" });
+      }
+
       return res.status(200).json({
         message: "User already exists. Logged in successfully.",
         token: generateToken(user._id),
@@ -25,7 +31,7 @@ export const registerUser = async (req, res) => {
       });
     }
 
-    // If user doesn't exist, register new user
+    // Register new user
     const hashedPassword = await hashPassword(password);
     user = await User.create({ email, password: hashedPassword, role });
 
