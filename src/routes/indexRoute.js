@@ -2,11 +2,15 @@ import express from "express";
 import authRoutes from "./auth/authRoutes/indexRoute.js";
 import clientRoutes from "./client/clientRoutes/indexRoute.js";
 import projectRoutes from "./project/projectRoutes/indexRoute.js";
+import timesheetRoutes from "./timesheet/timesheetRoutes/timesheetRoute.js";
+import invoiceRoutes from "./invoice/invoiceRoutes/indexRoute.js";
 
 const router = express.Router();
 
 router.use("/auth", authRoutes);
 router.use("/client", clientRoutes);
 router.use("/project", projectRoutes);
+router.use("/timesheet", timesheetRoutes);
+router.use("/invoice", invoiceRoutes);
 
 export default router;
