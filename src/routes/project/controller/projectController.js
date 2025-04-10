@@ -10,7 +10,7 @@ export const createProject = async (req, res) => {
 };
 
 export const getAllProjects = async (req, res) => {
-  const projects = await Project.find().populate("client");
+  const projects = await Project.find().populate("client", "name");
   res.json(projects);
 };
 
