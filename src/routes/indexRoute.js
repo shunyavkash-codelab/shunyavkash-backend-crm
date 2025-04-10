@@ -4,6 +4,7 @@ import clientRoutes from "./client/clientRoutes/indexRoute.js";
 import projectRoutes from "./project/projectRoutes/indexRoute.js";
 import timesheetRoutes from "./timesheet/timesheetRoutes/timesheetRoute.js";
 import invoiceRoutes from "./invoice/invoiceRoutes/indexRoute.js";
+import employeeRoutes from "./employee/employeeRoutes/indexRoute.js";
 
 const router = express.Router();
 
@@ -12,5 +13,6 @@ router.use("/client", clientRoutes);
 router.use("/project", projectRoutes);
 router.use("/timesheet", timesheetRoutes);
 router.use("/invoice", invoiceRoutes);
+router.use("/employee", employeeRoutes);
 
 export default router;
