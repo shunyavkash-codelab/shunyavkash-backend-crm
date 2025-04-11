@@ -1,20 +1,3 @@
-// import multer from "multer";
-// import { CloudinaryStorage } from "multer-storage-cloudinary";
-// import cloudinary from "../configs/cloudinary.js";
-
-// const storage = new CloudinaryStorage({
-//   cloudinary: cloudinary,
-//   params: {
-//     folder: "employee_avatars", // Folder name in Cloudinary
-//     allowed_formats: ["jpg", "jpeg", "png"],
-//     transformation: [{ width: 300, height: 300, crop: "limit" }],
-//   },
-// });
-
-// const upload = multer({ storage });
-
-// export default upload;
-
 import multer from "multer";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import cloudinary from "../configs/cloudinary.js";
