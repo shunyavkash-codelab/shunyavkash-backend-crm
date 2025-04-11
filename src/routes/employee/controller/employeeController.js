@@ -72,7 +72,25 @@ export const getEmployeeById = async (req, res) => {
   }
 };
 
-// Update Employee
+const extractAvatarPublicId = (url) => {
+  if (!url) return null;
+
+  const parts = url.split("/");
+  const fileNameWithExt = parts.pop(); // e.g., 1744350654695-samurai-model.png.png
+  const fileName = fileNameWithExt.replace(/\.[^/.]+$/, ""); // Remove one extension
+  const folder = parts.slice(-1)[0]; // get folder like 'employee_avatars'
+  return `${folder}/${fileName}`;
+};
+
+const extractDocumentPublicId = (url) => {
+  if (!url) return null;
+
+  const parts = url.split("/");
+  const fileNameWithExt = parts.pop(); // e.g., 1744362151885-eye-open.png
+  const [publicId] = fileNameWithExt.split("."); // remove extension completely
+  return `employee_documents/${publicId}`;
+};
+
 export const updateEmployee = async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id);
@@ -81,25 +99,34 @@ export const updateEmployee = async (req, res) => {
 
     const updatedData = { ...req.body };
 
-    // Handle new avatar upload
-    if (req.files?.avatar?.[0]) {
+    // Replace Avatar
+    const newAvatar = req.files?.avatar?.[0];
+    if (newAvatar) {
       if (employee.avatar) {
-        const publicId = employee.avatar
-          .split("/")
-          .pop()
-          .split(".")[0];
-        await cloudinary.uploader.destroy(`employee_avatars/${publicId}`);
+        const publicId = extractAvatarPublicId(employee.avatar);
+        await cloudinary.uploader.destroy(publicId);
       }
-      updatedData.avatar = req.files.avatar[0].path;
+      updatedData.avatar = newAvatar.path;
     }
 
-    // Append new documents (don't delete existing ones)
-    if (req.files?.documents?.length) {
-      const newDocs = req.files.documents.map((file) => ({
+    //  Replace Documents
+    const newDocs = req.files?.documents || [];
+    if (newDocs.length) {
+      await Promise.all(
+        employee.documents.map(async (doc) => {
+          const publicId = extractDocumentPublicId(doc.url);
+          console.log("Deleting document from Cloudinary:", publicId);
+
+          await cloudinary.uploader.destroy(publicId, {
+            resource_type: "raw",
+          });
+        })
+      );
+
+      updatedData.documents = newDocs.map((file) => ({
         name: file.originalname,
         url: file.path,
       }));
-      updatedData.documents = [...employee.documents, ...newDocs];
     }
 
     const updated = await Employee.findByIdAndUpdate(
@@ -107,6 +134,7 @@ export const updateEmployee = async (req, res) => {
       updatedData,
       { new: true }
     );
+
     res.json(updated);
   } catch (err) {
     res
@@ -124,22 +152,16 @@ export const deleteEmployee = async (req, res) => {
 
     // Delete avatar
     if (employee.avatar) {
-      const publicId = employee.avatar
-        .split("/")
-        .pop()
-        .split(".")[0];
-      await cloudinary.uploader.destroy(`employee_avatars/${publicId}`);
+      const publicId = extractAvatarPublicId(employee.avatar);
+      await cloudinary.uploader.destroy(publicId);
     }
 
     // Delete all documents
     for (const doc of employee.documents) {
-      const publicId = doc.url
-        .split("/")
-        .pop()
-        .split(".")[0];
-      await cloudinary.uploader.destroy(`employee_documents/${publicId}`, {
-        resource_type: "raw",
-      });
+      const publicId = extractDocumentPublicId(doc.url);
+      console.log("Deleting document from Cloudinary:", publicId);
+
+      await cloudinary.uploader.destroy(publicId, { resource_type: "raw" });
     }
 
     await Employee.findByIdAndDelete(req.params.id);

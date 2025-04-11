@@ -2,7 +2,7 @@ import multer from "multer";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import cloudinary from "../configs/cloudinary.js";
 
-// Combined Storage Logic
+// Combined Cloudinary Storage Config
 const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => {
@@ -29,6 +29,7 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({ storage });
 
+//  Export a multi-upload middleware
 export const multiUpload = upload.fields([
   { name: "avatar", maxCount: 1 },
   { name: "documents", maxCount: 10 },
