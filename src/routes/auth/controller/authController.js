@@ -2,6 +2,7 @@ import User from "../../../models/User.js";
 import { hashPassword, comparePassword } from "../../../utils/bcryptUtils.js";
 import generateToken from "../../../utils/generateToken.js";
 
+// Register user
 export const registerUser = async (req, res) => {
   try {
     const { email, password, role } = req.body;
@@ -45,4 +46,9 @@ export const registerUser = async (req, res) => {
       .status(500)
       .json({ message: "Something went wrong", error: err.message });
   }
+};
+
+// Get logged-in user
+export const getLoggedInUser = async (req, res) => {
+  res.status(200).json(req.user);
 };
