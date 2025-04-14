@@ -4,19 +4,19 @@ const interviewSchema = new mongoose.Schema(
   {
     candidateName: {
       type: String,
-      required: true,
+      //   required: true,
     },
     candidateEmail: {
       type: String,
-      required: true,
+      //   required: true,
     },
     position: {
       type: String,
-      required: true,
+      //   required: true,
     },
     interviewDate: {
       type: Date,
-      required: true,
+      // required: true,
     },
     interviewTime: {
       type: String,
@@ -25,7 +25,7 @@ const interviewSchema = new mongoose.Schema(
     interviewer: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Employee",
-      required: true,
+      //   required: true,
     },
     status: {
       type: String,
@@ -37,9 +37,12 @@ const interviewSchema = new mongoose.Schema(
       enum: ["Online", "Offline"],
       //   required: true,
     },
-    resumeUrl: {
+    resume: {
+      name: String,
+      url: String,
+    },
+    resumePublicId: {
       type: String,
-      default: "",
     },
     feedback: {
       type: String,
