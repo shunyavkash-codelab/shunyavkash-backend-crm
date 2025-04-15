@@ -1,5 +1,10 @@
 import Employee from "../../../models/Employee.js";
-import cloudinary from "../../../configs/cloudinary.js";
+import {
+  processUploadedFile,
+  processUploadedFiles,
+  deleteEmployeeAvatar,
+  deleteEmployeeDocuments,
+} from "../../../utils/cloudinaryHelpers.js";
 
 // Create Employee
 export const createEmployee = async (req, res) => {
@@ -16,12 +21,9 @@ export const createEmployee = async (req, res) => {
       address,
     } = req.body;
 
-    const avatar = req.files?.avatar?.[0]?.path;
-
-    const documents = (req.files?.documents || []).map((file) => ({
-      name: file.originalname,
-      url: file.path,
-    }));
+    // Process avatar and documents
+    const avatarFile = processUploadedFile(req.files?.avatar?.[0]);
+    const documents = processUploadedFiles(req.files?.documents);
 
     const newEmployee = new Employee({
       firstName,
@@ -33,7 +35,8 @@ export const createEmployee = async (req, res) => {
       salary,
       status,
       address,
-      avatar,
+      avatar: avatarFile?.url || "",
+      avatarPublicId: avatarFile?.publicId || "",
       documents,
     });
 
@@ -72,25 +75,7 @@ export const getEmployeeById = async (req, res) => {
   }
 };
 
-const extractAvatarPublicId = (url) => {
-  if (!url) return null;
-
-  const parts = url.split("/");
-  const fileNameWithExt = parts.pop(); // e.g., 1744350654695-samurai-model.png.png
-  const fileName = fileNameWithExt.replace(/\.[^/.]+$/, ""); // Remove one extension
-  const folder = parts.slice(-1)[0]; // get folder like 'employee_avatars'
-  return `${folder}/${fileName}`;
-};
-
-const extractDocumentPublicId = (url) => {
-  if (!url) return null;
-
-  const parts = url.split("/");
-  const fileNameWithExt = parts.pop(); // e.g., 1744362151885-eye-open.png
-  const [publicId] = fileNameWithExt.split("."); // remove extension completely
-  return `employee_documents/${publicId}`;
-};
-
+// Update Employee
 export const updateEmployee = async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id);
@@ -99,34 +84,26 @@ export const updateEmployee = async (req, res) => {
 
     const updatedData = { ...req.body };
 
-    // Replace Avatar
+    // Handle Avatar Update
     const newAvatar = req.files?.avatar?.[0];
     if (newAvatar) {
-      if (employee.avatar) {
-        const publicId = extractAvatarPublicId(employee.avatar);
-        await cloudinary.uploader.destroy(publicId);
-      }
-      updatedData.avatar = newAvatar.path;
+      // Delete old avatar if it exists
+      await deleteEmployeeAvatar(employee);
+
+      // Set new avatar
+      const processedAvatar = processUploadedFile(newAvatar);
+      updatedData.avatar = processedAvatar.url;
+      updatedData.avatarPublicId = processedAvatar.publicId;
     }
 
-    //  Replace Documents
-    const newDocs = req.files?.documents || [];
-    if (newDocs.length) {
-      await Promise.all(
-        employee.documents.map(async (doc) => {
-          const publicId = extractDocumentPublicId(doc.url);
-          console.log("Deleting document from Cloudinary:", publicId);
+    // Handle Documents Update
+    const newDocs = req.files?.documents;
+    if (newDocs && newDocs.length > 0) {
+      // Delete old documents
+      await deleteEmployeeDocuments(employee.documents);
 
-          await cloudinary.uploader.destroy(publicId, {
-            resource_type: "raw",
-          });
-        })
-      );
-
-      updatedData.documents = newDocs.map((file) => ({
-        name: file.originalname,
-        url: file.path,
-      }));
+      // Set new documents
+      updatedData.documents = processUploadedFiles(newDocs);
     }
 
     const updated = await Employee.findByIdAndUpdate(
@@ -150,22 +127,12 @@ export const deleteEmployee = async (req, res) => {
     if (!employee)
       return res.status(404).json({ message: "Employee not found" });
 
-    // Delete avatar
-    if (employee.avatar) {
-      const publicId = extractAvatarPublicId(employee.avatar);
-      await cloudinary.uploader.destroy(publicId);
-    }
-
-    // Delete all documents
-    for (const doc of employee.documents) {
-      const publicId = extractDocumentPublicId(doc.url);
-      console.log("Deleting document from Cloudinary:", publicId);
-
-      await cloudinary.uploader.destroy(publicId, { resource_type: "raw" });
-    }
+    // Delete avatar and documents
+    await deleteEmployeeAvatar(employee);
+    await deleteEmployeeDocuments(employee.documents);
 
     await Employee.findByIdAndDelete(req.params.id);
-    res.json({ message: "Employee deleted" });
+    res.json({ message: "Employee deleted successfully" });
   } catch (err) {
     res
       .status(500)
