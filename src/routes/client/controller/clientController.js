@@ -1,4 +1,5 @@
 import Client from "../../../models/Client.js";
+import project from "../../../models/project.js";
 
 // Create Client
 export const createClient = async (req, res) => {
@@ -39,6 +40,22 @@ export const updateClient = async (req, res) => {
 
 // Delete Client
 export const deleteClient = async (req, res) => {
-  await Client.findByIdAndDelete(req.params.id);
-  res.json({ message: "Client deleted" });
+  try {
+    const clientId = req.params.id;
+
+    // Check if any project exists with this client
+    const linkedProjects = await Project.findOne({ client: clientId });
+
+    if (linkedProjects) {
+      return res.status(400).json({
+        message:
+          "Cannot delete client. Projects are associated with this client.",
+      });
+    }
+
+    await Client.findByIdAndDelete(clientId);
+    res.json({ message: "Client deleted successfully." });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
