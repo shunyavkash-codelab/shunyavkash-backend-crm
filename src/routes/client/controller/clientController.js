@@ -50,7 +50,7 @@ export const deleteClient = async (req, res) => {
       return res.status(400).json({
         success: false,
         error:
-          "Cannot delete client. Projects are associated with this client.",
+          "Cannot delete client, Projects are associated with this client.",
       });
     }
 
