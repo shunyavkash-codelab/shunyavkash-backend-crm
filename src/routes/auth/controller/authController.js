@@ -5,14 +5,10 @@ import generateToken from "../../../utils/generateToken.js";
 // Register user
 export const registerUser = async (req, res) => {
   try {
-    const { email, password, role } = req.body;
+    const { email, password } = req.body;
 
-    if (!email || !password || !role) {
+    if (!email || !password) {
       return res.status(400).json({ message: "All fields are required" });
-    }
-
-    if (!["Admin", "HR", "Employee"].includes(role)) {
-      return res.status(400).json({ message: "Invalid role selected" });
     }
 
     let user = await User.findOne({ email });
@@ -28,18 +24,18 @@ export const registerUser = async (req, res) => {
       return res.status(200).json({
         message: "User already exists. Logged in successfully.",
         token: generateToken(user._id),
-        user: { id: user._id, email: user.email, role: user.role },
+        user: { id: user._id, email: user.email },
       });
     }
 
     // Register new user
     const hashedPassword = await hashPassword(password);
-    user = await User.create({ email, password: hashedPassword, role });
+    user = await User.create({ email, password: hashedPassword });
 
     res.status(201).json({
       message: "Registration successful",
       token: generateToken(user._id),
-      user: { id: user._id, email: user.email, role: user.role },
+      user: { id: user._id, email: user.email },
     });
   } catch (err) {
     res
