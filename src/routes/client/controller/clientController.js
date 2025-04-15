@@ -43,19 +43,22 @@ export const deleteClient = async (req, res) => {
   try {
     const clientId = req.params.id;
 
-    // Check if any project exists with this client
+    // Check if any project is linked to this client
     const linkedProjects = await Project.findOne({ client: clientId });
 
     if (linkedProjects) {
       return res.status(400).json({
-        message:
+        success: false,
+        error:
           "Cannot delete client. Projects are associated with this client.",
       });
     }
 
     await Client.findByIdAndDelete(clientId);
-    res.json({ message: "Client deleted successfully." });
+    res
+      .status(200)
+      .json({ success: true, message: "Client deleted successfully." });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
