@@ -76,6 +76,92 @@ export const getEmployeeById = async (req, res) => {
 };
 
 // Update Employee
+// export const updateEmployee = async (req, res) => {
+//   try {
+//     const employee = await Employee.findById(req.params.id);
+//     if (!employee)
+//       return res.status(404).json({ message: "Employee not found" });
+
+//     // Update Employee
+//     const updatedData = { ...req.body };
+
+//     // Handle Avatar Update
+//     const newAvatar = req.files?.avatar?.[0];
+//     if (newAvatar) {
+//       // Delete old avatar if it exists
+//       await deleteEmployeeAvatar(employee);
+
+//       // Set new avatar
+//       const processedAvatar = processUploadedFile(newAvatar);
+//       updatedData.avatar = processedAvatar.url;
+//       updatedData.avatarPublicId = processedAvatar.publicId;
+//     }
+
+//     // Handle Documents Update
+//     const newDocs = req.files?.documents;
+//     // if (newDocs && newDocs.length > 0) {
+//     //   // Delete old documents
+//     //   await deleteEmployeeDocuments(employee.documents);
+
+//     //   // Set new documents
+//     //   updatedData.documents = processUploadedFiles(newDocs);
+//     // }
+
+//     let currentDocs = employee.documents || [];
+
+//     if (documentsToDelete.length > 0) {
+//       for (const publicId of documentsToDelete) {
+//         await safeDeleteFile(publicId);
+//       }
+
+//       currentDocs = currentDocs.filter(
+//         (doc) => !documentsToDelete.includes(doc.publicId)
+//       );
+//     }
+
+//     if (req.files?.documents?.length > 0) {
+//       const processedNewDocs = processUploadedFiles(req.files.documents);
+//       currentDocs = [...currentDocs, ...processedNewDocs];
+//     }
+
+//     updatedData.documents = currentDocs;
+
+//     // Handle Documents Deletion
+//     let documentsToDelete = [];
+//     try {
+//       documentsToDelete = JSON.parse(req.body.documentsToDelete || "[]");
+//     } catch (e) {
+//       console.error("Invalid documentsToDelete format:", e.message);
+//     }
+
+//     if (documentsToDelete.length > 0) {
+//       for (const publicId of documentsToDelete) {
+//         await safeDeleteFile(publicId);
+//       }
+
+//       // Remove deleted docs from existing list
+//       const filteredDocs = employee.documents.filter(
+//         (doc) => !documentsToDelete.includes(doc.publicId)
+//       );
+
+//       updatedData.documents = filteredDocs;
+//     }
+
+//     const updated = await Employee.findByIdAndUpdate(
+//       req.params.id,
+//       updatedData,
+//       { new: true }
+//     );
+
+//     res.json(updated);
+//   } catch (err) {
+//     res
+//       .status(400)
+//       .json({ message: "Failed to update employee", error: err.message });
+//   }
+// };
+
+// Update Employee
 export const updateEmployee = async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id);
@@ -87,23 +173,40 @@ export const updateEmployee = async (req, res) => {
     // Handle Avatar Update
     const newAvatar = req.files?.avatar?.[0];
     if (newAvatar) {
-      // Delete old avatar if it exists
-      await deleteEmployeeAvatar(employee);
-
-      // Set new avatar
+      await deleteEmployeeAvatar(employee); // Delete old avatar
       const processedAvatar = processUploadedFile(newAvatar);
       updatedData.avatar = processedAvatar.url;
       updatedData.avatarPublicId = processedAvatar.publicId;
     }
 
-    // Handle Documents Update
+    // Handle Document Deletion
+    let documentsToDelete = [];
+    try {
+      documentsToDelete = JSON.parse(req.body.documentsToDelete || "[]");
+    } catch (e) {
+      console.error("Invalid documentsToDelete format:", e.message);
+    }
+
+    // Delete documents from Cloudinary
+    if (documentsToDelete.length > 0) {
+      for (const publicId of documentsToDelete) {
+        await safeDeleteFile(publicId); // Directly delete by publicId
+      }
+
+      // Remove deleted docs from the existing list
+      updatedData.documents = employee.documents.filter(
+        (doc) => !documentsToDelete.includes(doc.publicId)
+      );
+    }
+
+    // Handle Document Update (Add new docs)
     const newDocs = req.files?.documents;
     if (newDocs && newDocs.length > 0) {
-      // Delete old documents
-      await deleteEmployeeDocuments(employee.documents);
-
-      // Set new documents
-      updatedData.documents = processUploadedFiles(newDocs);
+      const processedNewDocs = processUploadedFiles(newDocs);
+      updatedData.documents = [
+        ...(updatedData.documents || employee.documents),
+        ...processedNewDocs,
+      ];
     }
 
     const updated = await Employee.findByIdAndUpdate(

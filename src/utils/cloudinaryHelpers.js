@@ -102,7 +102,6 @@ export const deleteFileByIdOrUrl = async (publicId, url) => {
 // Process uploaded file and return structured data
 export const processUploadedFile = (file) => {
   if (!file) return null;
-
   return {
     url: file.path,
     publicId: file.filename || extractPublicIdFromUrl(file.path),
@@ -125,11 +124,9 @@ export const deleteEmployeeAvatar = async (employee) => {
 // Delete all documents from employee
 export const deleteEmployeeDocuments = async (documents = []) => {
   const results = [];
-
   for (const doc of documents) {
     const result = await deleteFileByIdOrUrl(doc.publicId, doc.url);
     results.push(result);
   }
-
   return results;
 };
