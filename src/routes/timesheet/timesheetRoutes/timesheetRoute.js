@@ -2,6 +2,7 @@ import express from "express";
 import {
   createTimesheet,
   getAllTimesheets,
+  getTimesheetById,
   updateTimesheet,
   deleteTimesheet,
   finalizeTimesheet,
@@ -13,6 +14,7 @@ const router = express.Router();
 
 router.post("/", protect, createTimesheet);
 router.get("/", protect, getAllTimesheets);
+router.get("/:id", getTimesheetById);
 router.put("/:id", protect, updateTimesheet);
 router.delete("/:id", protect, deleteTimesheet);
 router.put(

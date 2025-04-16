@@ -57,6 +57,25 @@ export const getInvoices = async (req, res) => {
   }
 };
 
+// Get single invoice by ID
+export const getInvoiceById = async (req, res) => {
+  try {
+    const invoice = await Invoice.findById(req.params.id)
+      .populate("client", "name email")
+      .populate("timesheets");
+
+    if (!invoice) {
+      return res.status(404).json({ message: "Invoice not found" });
+    }
+
+    res.status(200).json(invoice);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Failed to fetch invoice", error: error.message });
+  }
+};
+
 // Update Invoice Status
 export const updateInvoiceStatus = async (req, res) => {
   try {
@@ -83,5 +102,22 @@ export const updateInvoiceStatus = async (req, res) => {
     res
       .status(500)
       .json({ message: "Failed to update invoice", error: error.message });
+  }
+};
+
+// Delete invoice
+export const deleteInvoice = async (req, res) => {
+  try {
+    const invoice = await Invoice.findByIdAndDelete(req.params.id);
+
+    if (!invoice) {
+      return res.status(404).json({ message: "Invoice not found" });
+    }
+
+    res.status(200).json({ message: "Invoice deleted successfully" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Failed to delete invoice", error: error.message });
   }
 };

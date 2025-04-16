@@ -40,6 +40,25 @@ export const getAllTimesheets = async (req, res) => {
   }
 };
 
+// Get single timesheet by ID
+export const getTimesheetById = async (req, res) => {
+  try {
+    const timesheet = await Timesheet.findById(req.params.id)
+      .populate("employee", "email role")
+      .populate("project", "title");
+
+    if (!timesheet) {
+      return res.status(404).json({ message: "Timesheet not found" });
+    }
+
+    res.status(200).json(timesheet);
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Error fetching timesheet", error: err.message });
+  }
+};
+
 //  Update timesheet by ID
 export const updateTimesheet = async (req, res) => {
   try {
