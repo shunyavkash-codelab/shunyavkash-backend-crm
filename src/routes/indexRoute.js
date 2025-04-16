@@ -8,6 +8,7 @@ import employeeRoutes from "./employee/employeeRoutes/indexRoute.js";
 import leaveRoutes from "./leave/leaveRoutes/indexRoute.js";
 import interviewRoutes from "./interview/interviewRoutes/indexRoute.js";
 import attendanceRoutes from "./attendance/attendanceRoutes/indexRoute.js";
+import payrollRoutes from "./payroll/payrollRoutes/indexRoute.js";
 
 const router = express.Router();
 
@@ -20,5 +21,6 @@ router.use("/employee", employeeRoutes);
 router.use("/leave", leaveRoutes);
 router.use("/interview", interviewRoutes);
 router.use("/attendance", attendanceRoutes);
+router.use("/payroll", payrollRoutes);
 
 export default router;
