@@ -2,7 +2,7 @@ import multer from "multer";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import cloudinary from "../configs/cloudinary.js";
 
-// Unified Cloudinary Storage Config
+// Cloudinary Storage Config
 const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => {
@@ -36,13 +36,13 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({ storage });
 
-// 🔹 Employee Upload (avatar + multiple documents)
+// Employee Upload (avatar + multiple documents)
 export const multiUpload = upload.fields([
   { name: "avatar", maxCount: 1 },
   { name: "documents", maxCount: 10 },
 ]);
 
-// 🔹 Interview Upload (resume)
+// Interview Upload (resume)
 export const interviewUpload = upload.fields([{ name: "resume", maxCount: 1 }]);
 
 export default upload;
