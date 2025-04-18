@@ -1,38 +1,3 @@
-// import puppeteer from "puppeteer-core";
-// import fs from "fs/promises";
-// import os from "os";
-// import path from "path";
-// import { v4 as uuidv4 } from "uuid";
-
-// export const generatePDFFileObject = async (htmlContent) => {
-//   const browser = await puppeteer.launch({
-//     headless: "new",
-//     executablePath:
-//       "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-//     args: ["--no-sandbox", "--disable-setuid-sandbox"],
-//   });
-
-//   const page = await browser.newPage();
-//   await page.setContent(htmlContent, { waitUntil: "networkidle0" });
-
-//   const pdfBuffer = await page.pdf({
-//     format: "A4",
-//     printBackground: true,
-//     margin: { top: "20px", right: "20px", bottom: "20px", left: "20px" },
-//   });
-
-//   await browser.close();
-
-//   const filename = `invoice-${uuidv4()}.pdf`;
-//   const tempPath = path.join(os.tmpdir(), filename);
-//   await fs.writeFile(tempPath, pdfBuffer);
-
-//   return {
-//     path: tempPath,
-//     mimetype: "application/pdf", // important for your condition
-//     originalname: filename,
-//   };
-// };
 import puppeteer from "puppeteer-core";
 import fs from "fs/promises";
 import os from "os";
