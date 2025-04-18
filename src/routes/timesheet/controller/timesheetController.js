@@ -44,7 +44,7 @@ export const getAllTimesheets = async (req, res) => {
 export const getTimesheetById = async (req, res) => {
   try {
     const timesheet = await Timesheet.findById(req.params.id)
-      .populate("employee", "email role")
+      .populate("employee", "firstName lastName email role")
       .populate("project", "title");
 
     if (!timesheet) {
