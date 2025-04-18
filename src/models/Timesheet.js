@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const timesheetSchema = new mongoose.Schema({
   employee: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User", // reference to the employee
+    ref: "Employee", // reference to the employee
     required: true,
   },
   project: {
