@@ -26,7 +26,7 @@ const projectSchema = new mongoose.Schema({
   assignedEmployees: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Employee",
     },
   ],
   isArchived: {
