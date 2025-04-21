@@ -9,10 +9,6 @@ export const createProject = async (req, res) => {
   }
 };
 
-// export const getAllProjects = async (req, res) => {
-//   const projects = await Project.find().populate("client", "name");
-//   res.json(projects);
-// };
 export const getAllProjects = async (req, res) => {
   try {
     const projects = await Project.find({ isArchived: false }).populate(
@@ -25,16 +21,41 @@ export const getAllProjects = async (req, res) => {
   }
 };
 
+export const getProjectById = async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id).populate(
+      "client",
+      "name"
+    );
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+    res.json(project);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export const updateProject = async (req, res) => {
-  const project = await Project.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-  });
-  res.json(project);
+  try {
+    const project = await Project.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+    if (!project) return res.status(404).json({ message: "Project not found" });
+    res.json(project);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 };
 
 export const deleteProject = async (req, res) => {
-  await Project.findByIdAndDelete(req.params.id);
-  res.json({ message: "Project deleted" });
+  try {
+    const project = await Project.findByIdAndDelete(req.params.id);
+    if (!project) return res.status(404).json({ message: "Project not found" });
+    res.json({ message: "Project deleted" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };
 export const archiveProject = async (req, res) => {
   try {
@@ -64,5 +85,31 @@ export const getArchivedProjects = async (req, res) => {
     res.json(archivedProjects);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+export const assignEmployeesToProject = async (req, res) => {
+  try {
+    const { employees } = req.body; // Array of { employeeId, role }
+
+    const assigned = await Promise.all(
+      employees.map(async ({ employeeId, role }) => {
+        const employee = await Employee.findById(employeeId);
+        if (!employee) throw new Error(`Employee ${employeeId} not found`);
+        return { _id: employee._id, name: employee.name, role };
+      })
+    );
+
+    const updated = await Project.findByIdAndUpdate(
+      req.params.id,
+      { assignedEmployees: assigned },
+      { new: true }
+    ).populate("client");
+
+    if (!updated) return res.status(404).json({ message: "Project not found" });
+
+    res.json(updated);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
   }
 };
