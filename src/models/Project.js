@@ -25,12 +25,14 @@ const projectSchema = new mongoose.Schema({
   },
   assignedEmployees: [
     {
-      _id: {
+      employeeId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Employee",
+        required: true,
       },
       name: String,
       role: String,
+      _id: false, // prevent MongoDB from creating a subdocument _id
     },
   ],
   isArchived: {

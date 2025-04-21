@@ -1,4 +1,5 @@
 import Project from "../../../models/Project.js";
+import Employee from "../../../models/Employee.js";
 
 export const createProject = async (req, res) => {
   try {
@@ -57,6 +58,7 @@ export const deleteProject = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 export const archiveProject = async (req, res) => {
   try {
     const project = await Project.findById(req.params.id);
@@ -88,28 +90,43 @@ export const getArchivedProjects = async (req, res) => {
   }
 };
 
+// Assign Employees
 export const assignEmployeesToProject = async (req, res) => {
   try {
     const { employees } = req.body; // Array of { employeeId, role }
 
+    // Ensure employees array is passed
+    if (!employees || employees.length === 0) {
+      return res.status(400).json({ error: "No employees provided" });
+    }
+
+    // Retrieve employees and validate existence
     const assigned = await Promise.all(
       employees.map(async ({ employeeId, role }) => {
-        const employee = await Employee.findById(employeeId);
-        if (!employee) throw new Error(`Employee ${employeeId} not found`);
+        const employee = await Employee.findById(employeeId); // Using Employee model
+        if (!employee) {
+          throw new Error(`Employee ${employeeId} not found`);
+        }
         return { _id: employee._id, name: employee.name, role };
       })
     );
 
-    const updated = await Project.findByIdAndUpdate(
+    // Update the project with assigned employees
+    const updatedProject = await Project.findByIdAndUpdate(
       req.params.id,
       { assignedEmployees: assigned },
       { new: true }
     ).populate("client");
 
-    if (!updated) return res.status(404).json({ message: "Project not found" });
+    // Check if project exists
+    if (!updatedProject) {
+      return res.status(404).json({ message: "Project not found" });
+    }
 
-    res.json(updated);
+    // Send updated project back
+    res.json(updatedProject);
   } catch (error) {
+    console.error("Error assigning employees:", error);
     res.status(400).json({ error: error.message });
   }
 };
