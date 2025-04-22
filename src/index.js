@@ -2,7 +2,7 @@ import "dotenv/config";
 
 import express from "express";
 import connectDB from "./configs/db.js";
-import mainRoutes from "./lib/router.js";
+import mainRoutes from "./router.js";
 import corsMiddleware from "./middlewares/corsMiddleware.js";
 import "./cronJobs/invoiceCleanup.js";
 
