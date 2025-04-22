@@ -1,4 +1,5 @@
 import Timesheet from "../Timesheet.js";
+import Invoice from "../../invoice/Invoice.js";
 
 //  Create new timesheet entry
 export const createTimesheet = async (req, res) => {
@@ -88,13 +89,27 @@ export const deleteTimesheet = async (req, res) => {
   const { id } = req.params;
 
   try {
+    // 1. Check if this timesheet is in any finalized invoice
+    const linkedInvoice = await Invoice.findOne({
+      timesheets: id,
+      status: "Finalized",
+    });
+
+    if (linkedInvoice) {
+      return res.status(400).json({
+        message:
+          "Cannot delete timesheet. It is linked to a finalized invoice.",
+      });
+    }
+
+    // 2. Proceed with deletion if safe
     const timesheet = await Timesheet.findByIdAndDelete(id);
 
     if (!timesheet) {
       return res.status(404).json({ message: "Timesheet not found" });
     }
 
-    return res.status(200).json({ message: "Timesheet deleted successfully" }); // Confirmation message
+    return res.status(200).json({ message: "Timesheet deleted successfully" });
   } catch (err) {
     return res
       .status(500)

@@ -143,7 +143,7 @@ export const generateInvoiceHTML = (invoice, client, timesheets) => {
         <div class="invoice-info">
           <div>
             <h3>From:</h3>
-            <p>Your Company Name<br>
+            <p>Shunyavkash PVT LTD<br>
             123 Business Street<br>
             City, State ZIP<br>
             Email: billing@yourcompany.com<br>
