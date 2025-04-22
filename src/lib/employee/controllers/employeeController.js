@@ -1,4 +1,5 @@
 import Employee from "../Employee.js";
+import Project from "../../project/Project.js";
 import {
   processUploadedFile,
   processUploadedFiles,
@@ -64,13 +65,34 @@ export const getAllEmployees = async (req, res) => {
 };
 
 // Get Single Employee
+// export const getEmployeeById = async (req, res) => {
+//   try {
+//     const employee = await Employee.findById(req.params.id);
+//     if (!employee) {
+//       return res.status(404).json({ message: "Employee not found" });
+//     }
+//     return res.status(200).json(employee);
+//   } catch (err) {
+//     return res.status(500).json({
+//       message: "Failed to fetch employee",
+//       error: err.message,
+//     });
+//   }
+// };
+
 export const getEmployeeById = async (req, res) => {
   try {
-    const employee = await Employee.findById(req.params.id);
+    const employee = await Employee.findById(req.params.id).lean();
     if (!employee) {
       return res.status(404).json({ message: "Employee not found" });
     }
-    return res.status(200).json(employee);
+
+    // Fetch assigned projects
+    const projects = await Project.find({
+      assignedEmployees: employee._id,
+    }).select("name description status");
+
+    return res.status(200).json({ ...employee, assignedProjects: projects });
   } catch (err) {
     return res.status(500).json({
       message: "Failed to fetch employee",
