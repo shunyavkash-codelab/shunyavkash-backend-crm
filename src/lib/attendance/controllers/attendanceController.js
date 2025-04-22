@@ -1,5 +1,5 @@
 import Attendance from "../Attendance.js";
-import Employee from "../../employee/Employee.js";
+// import Employee from "../../employee/Employee.js";
 
 // 1. Employee Check-In
 export const checkIn = async (req, res) => {

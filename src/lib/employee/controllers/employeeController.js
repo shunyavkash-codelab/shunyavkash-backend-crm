@@ -1,3 +1,12 @@
+import Employee from "../Employee.js";
+import {
+  processUploadedFile,
+  processUploadedFiles,
+  deleteEmployeeAvatar,
+  deleteEmployeeDocuments,
+  safeDeleteFile,
+} from "../../../utils/cloudinaryHelpers.js";
+
 // Create Employee
 export const createEmployee = async (req, res) => {
   try {
