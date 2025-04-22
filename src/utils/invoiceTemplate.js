@@ -153,7 +153,7 @@ export const generateInvoiceHTML = (invoice, client, timesheets) => {
           <div>
             <h3>Bill To:</h3>
             <p><strong>${client?.name || "N/A"}</strong><br>
-            ${client?.address || "N/A"}<br>
+            Billing Address: ${client?.billingAddress || "N/A"}<br>
             Email: ${client?.email || "N/A"}<br>
             Phone: ${client?.phone || "N/A"}</p>
           </div>
