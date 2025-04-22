@@ -1,5 +1,5 @@
-import Attendance from "../models/Attendance.js";
-import Employee from "../models/Employee.js";
+import Attendance from "../lib/attendance/Attendance.js";
+import Employee from "../lib/employee/Employee.js";
 
 export const generatePayrollData = async ({
   employeeId,
