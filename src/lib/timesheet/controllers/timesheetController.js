@@ -1,7 +1,7 @@
 import Timesheet from "../Timesheet.js";
 import Invoice from "../../invoice/Invoice.js";
 
-//  Create new timesheet entry
+// Create new timesheet entry
 export const createTimesheet = async (req, res) => {
   const { employee, project, date, hoursWorked, description } = req.body;
 
@@ -21,13 +21,14 @@ export const createTimesheet = async (req, res) => {
 
     return res.status(201).json(timesheet); // Return after successful creation
   } catch (err) {
+    console.error("Error creating timesheet:", err);
     return res
       .status(500)
       .json({ message: "Error creating timesheet", error: err.message });
   }
 };
 
-//  Get all timesheets
+// Get all timesheets
 export const getAllTimesheets = async (req, res) => {
   try {
     const timesheets = await Timesheet.find()
@@ -36,6 +37,7 @@ export const getAllTimesheets = async (req, res) => {
 
     return res.status(200).json(timesheets); // Return the timesheets found
   } catch (err) {
+    console.error("Error fetching timesheets:", err);
     return res
       .status(500)
       .json({ message: "Error fetching timesheets", error: err.message });
@@ -57,13 +59,14 @@ export const getTimesheetById = async (req, res) => {
 
     return res.status(200).json(timesheet); // Return the single timesheet
   } catch (err) {
+    console.error("Error fetching timesheet:", err);
     return res
       .status(500)
       .json({ message: "Error fetching timesheet", error: err.message });
   }
 };
 
-//  Update timesheet by ID
+// Update timesheet by ID
 export const updateTimesheet = async (req, res) => {
   const { id } = req.params;
 
@@ -78,18 +81,19 @@ export const updateTimesheet = async (req, res) => {
 
     return res.status(200).json(timesheet); // Return the updated timesheet
   } catch (err) {
+    console.error("Error updating timesheet:", err);
     return res
       .status(500)
       .json({ message: "Error updating timesheet", error: err.message });
   }
 };
 
-//  Delete timesheet
+// Delete timesheet
 export const deleteTimesheet = async (req, res) => {
   const { id } = req.params;
 
   try {
-    // 1. Check if this timesheet is in any finalized invoice
+    // Check if this timesheet is in any finalized invoice
     const linkedInvoice = await Invoice.findOne({
       timesheets: id,
       status: "Finalized",
@@ -102,7 +106,7 @@ export const deleteTimesheet = async (req, res) => {
       });
     }
 
-    // 2. Proceed with deletion if safe
+    // Proceed with deletion if safe
     const timesheet = await Timesheet.findByIdAndDelete(id);
 
     if (!timesheet) {
@@ -111,13 +115,14 @@ export const deleteTimesheet = async (req, res) => {
 
     return res.status(200).json({ message: "Timesheet deleted successfully" });
   } catch (err) {
+    console.error("Error deleting timesheet:", err);
     return res
       .status(500)
       .json({ message: "Error deleting timesheet", error: err.message });
   }
 };
 
-//  Finalize timesheet
+// Finalize timesheet
 export const finalizeTimesheet = async (req, res) => {
   const { id } = req.params;
 
@@ -141,6 +146,7 @@ export const finalizeTimesheet = async (req, res) => {
 
     return res.status(200).json({ message: "Timesheet finalized", timesheet });
   } catch (err) {
+    console.error("Error finalizing timesheet:", err);
     return res
       .status(500)
       .json({ message: "Error finalizing timesheet", error: err.message });

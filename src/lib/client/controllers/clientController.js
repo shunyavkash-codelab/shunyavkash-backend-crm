@@ -7,6 +7,7 @@ export const createClient = async (req, res) => {
     const client = await Client.create(req.body);
     return res.status(201).json(client);
   } catch (error) {
+    console.error("[Create Client Error]:", error);
     return res.status(400).json({ error: error.message });
   }
 };
@@ -17,6 +18,7 @@ export const getAllClients = async (req, res) => {
     const clients = await Client.find();
     return res.status(200).json(clients);
   } catch (error) {
+    console.error("[Get All Clients Error]:", error);
     return res.status(500).json({ error: error.message });
   }
 };
@@ -30,6 +32,7 @@ export const getSingleClient = async (req, res) => {
     }
     return res.status(200).json(client);
   } catch (error) {
+    console.error("[Get Single Client Error]:", error);
     return res.status(500).json({ error: error.message });
   }
 };
@@ -47,6 +50,7 @@ export const updateClient = async (req, res) => {
 
     return res.status(200).json(client);
   } catch (error) {
+    console.error("[Update Client Error]:", error);
     return res.status(400).json({ error: error.message });
   }
 };
@@ -79,6 +83,7 @@ export const deleteClient = async (req, res) => {
       message: "Client deleted successfully.",
     });
   } catch (error) {
+    console.error("[Delete Client Error]:", error);
     return res.status(500).json({ success: false, error: error.message });
   }
 };

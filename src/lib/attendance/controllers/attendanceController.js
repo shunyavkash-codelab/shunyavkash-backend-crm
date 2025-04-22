@@ -1,5 +1,4 @@
 import Attendance from "../Attendance.js";
-// import Employee from "../../employee/Employee.js";
 
 // 1. Employee Check-In
 export const checkIn = async (req, res) => {
@@ -25,6 +24,7 @@ export const checkIn = async (req, res) => {
 
     return res.status(201).json(attendance);
   } catch (error) {
+    console.error("Error in checkIn:", error.message);
     return res.status(500).json({ error: error.message });
   }
 };
@@ -55,6 +55,7 @@ export const checkOut = async (req, res) => {
 
     return res.json({ message: "Checked out successfully", attendance });
   } catch (error) {
+    console.error("Error in checkOut:", error.message);
     return res.status(500).json({ error: error.message });
   }
 };
@@ -85,6 +86,7 @@ export const markLeave = async (req, res) => {
 
     return res.status(201).json(leave);
   } catch (error) {
+    console.error("Error in markLeave:", error.message);
     return res.status(500).json({ error: error.message });
   }
 };
@@ -99,6 +101,7 @@ export const getAllAttendance = async (req, res) => {
 
     return res.json(records);
   } catch (error) {
+    console.error("Error in getAllAttendance:", error.message);
     return res.status(500).json({ error: error.message });
   }
 };
@@ -114,6 +117,7 @@ export const getAttendanceByEmployee = async (req, res) => {
 
     return res.json(records);
   } catch (error) {
+    console.error("Error in getAttendanceByEmployee:", error.message);
     return res.status(500).json({ error: error.message });
   }
 };
@@ -124,6 +128,7 @@ export const deleteAttendance = async (req, res) => {
     await Attendance.findByIdAndDelete(req.params.id);
     return res.json({ message: "Attendance deleted" });
   } catch (error) {
+    console.error("Error in deleteAttendance:", error.message);
     return res.status(500).json({ error: error.message });
   }
 };

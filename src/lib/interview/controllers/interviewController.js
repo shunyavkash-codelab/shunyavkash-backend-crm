@@ -45,6 +45,7 @@ export const createInterview = async (req, res) => {
     const savedInterview = await newInterview.save();
     return res.status(201).json(savedInterview);
   } catch (err) {
+    console.error("Error in createInterview:", err);
     return res
       .status(400)
       .json({ message: "Failed to create interview", error: err.message });
@@ -60,6 +61,7 @@ export const getAllInterviews = async (req, res) => {
     );
     return res.json(interviews);
   } catch (err) {
+    console.error("Error in getAllInterviews:", err);
     return res
       .status(500)
       .json({ message: "Failed to fetch interviews", error: err.message });
@@ -78,6 +80,7 @@ export const getInterviewById = async (req, res) => {
     }
     return res.json(interview);
   } catch (err) {
+    console.error("Error in getInterviewById:", err);
     return res
       .status(500)
       .json({ message: "Failed to fetch interview", error: err.message });
@@ -141,6 +144,7 @@ export const updateInterview = async (req, res) => {
     const updatedInterview = await interview.save();
     return res.json(updatedInterview);
   } catch (err) {
+    console.error("Error in updateInterview:", err);
     return res
       .status(400)
       .json({ message: "Failed to update interview", error: err.message });
@@ -168,6 +172,7 @@ export const deleteInterview = async (req, res) => {
     await Interview.findByIdAndDelete(req.params.id);
     return res.json({ message: "Interview deleted successfully" });
   } catch (err) {
+    console.error("Error in deleteInterview:", err);
     return res
       .status(500)
       .json({ message: "Failed to delete interview", error: err.message });

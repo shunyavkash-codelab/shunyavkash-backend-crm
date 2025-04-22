@@ -44,6 +44,7 @@ export const registerUser = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error("Error in registerUser:", error.message);
     return res.status(500).json({
       message: "Something went wrong",
       error: error.message,
@@ -60,6 +61,7 @@ export const getLoggedInUser = async (req, res) => {
 
     return res.status(200).json(req.user);
   } catch (error) {
+    console.error("Error in getLoggedInUser:", error.message);
     return res.status(500).json({
       message: "Failed to get user",
       error: error.message,
