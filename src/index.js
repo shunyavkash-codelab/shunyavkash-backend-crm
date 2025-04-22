@@ -4,6 +4,7 @@ import express from "express";
 import connectDB from "./configs/db.js";
 import mainRoutes from "./lib/router.js";
 import corsMiddleware from "./middlewares/corsMiddleware.js";
+import "./cronJobs/invoiceCleanup.js";
 
 const app = express();
 app.use(corsMiddleware);
