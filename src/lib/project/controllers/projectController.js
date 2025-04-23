@@ -33,7 +33,7 @@ export const getProjectById = async (req, res) => {
       .populate("client")
       .populate({
         path: "assignedEmployees.employee",
-        select: "firstName lastName designation avatar status",
+        select: "firstName lastName department designation avatar status",
       });
 
     if (!project) {
@@ -152,7 +152,7 @@ export const assignEmployeesToProject = async (req, res) => {
       .populate("client")
       .populate({
         path: "assignedEmployees.employee",
-        select: "firstName lastName designation avatar status",
+        select: "firstName lastName department designation avatar status",
       });
 
     if (!updatedProject) {
