@@ -24,9 +24,6 @@ const employeeSchema = new mongoose.Schema({
   phone: {
     type: String,
   },
-  department: {
-    type: String,
-  },
   designation: {
     type: String,
   },
