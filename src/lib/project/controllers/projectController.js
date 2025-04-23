@@ -1,5 +1,7 @@
 import Project from "../Project.js";
 import Employee from "../../employee/Employee.js";
+import { sendEmail } from "../../../utils/sendEmail.js";
+import { generateAssignmentEmail } from "../../../utils/emailTemplates.js";
 
 // Create a new project
 export const createProject = async (req, res) => {
@@ -33,7 +35,7 @@ export const getProjectById = async (req, res) => {
       .populate("client")
       .populate({
         path: "assignedEmployees.employee",
-        select: "firstName lastName designation avatar status",
+        select: "firstName lastName department designation avatar status",
       });
 
     if (!project) {
@@ -121,7 +123,72 @@ export const getArchivedProjects = async (req, res) => {
   }
 };
 
-// Assign employees to project
+// export const assignEmployeesToProject = async (req, res) => {
+//   const { employees } = req.body;
+
+//   if (!employees || employees.length === 0) {
+//     return res.status(400).json({ error: "No employees provided" });
+//   }
+
+//   try {
+//     const project = await Project.findById(req.params.id);
+//     if (!project) {
+//       return res.status(404).json({ message: "Project not found" });
+//     }
+
+//     const existingEmployeeIds = project.assignedEmployees.map((e) =>
+//       e.employee.toString()
+//     );
+
+//     const assigned = [];
+
+//     for (const { employeeId, role } of employees) {
+//       if (existingEmployeeIds.includes(employeeId)) {
+//         console.log(`Employee ${employeeId} already assigned. Skipping.`);
+//         continue;
+//       }
+
+//       const employee = await Employee.findById(employeeId);
+//       if (!employee) {
+//         throw new Error(`Employee with ID ${employeeId} not found`);
+//       }
+
+//       // Send email notification
+//       if (employee.email) {
+//         const html = generateAssignmentEmail(
+//           employee.firstName,
+//           project.title,
+//           role
+//         );
+
+//         await sendEmail({
+//           to: employee.email,
+//           subject: "You have been assigned to a new project",
+//           html,
+//         });
+//       }
+
+//       assigned.push({ employee: employee._id, role });
+//     }
+
+//     if (assigned.length > 0) {
+//       project.assignedEmployees.push(...assigned);
+//       await project.save();
+//     }
+
+//     const updatedProject = await Project.findById(project._id)
+//       .populate("client")
+//       .populate({
+//         path: "assignedEmployees.employee",
+//         select: "firstName lastName department designation avatar status",
+//       });
+
+//     return res.status(200).json(updatedProject);
+//   } catch (error) {
+//     console.error("Error assigning employees:", error);
+//     return res.status(400).json({ error: error.message });
+//   }
+// };
 export const assignEmployeesToProject = async (req, res) => {
   const { employees } = req.body;
 
@@ -130,36 +197,65 @@ export const assignEmployeesToProject = async (req, res) => {
   }
 
   try {
-    const assigned = await Promise.all(
-      employees.map(async ({ employeeId, role }) => {
-        const employee = await Employee.findById(employeeId);
-
-        if (!employee) {
-          throw new Error(`Employee with ID ${employeeId} not found`);
-        }
-
-        return { employee: employee._id, role };
-      })
-    );
-
-    const updatedProject = await Project.findByIdAndUpdate(
-      req.params.id,
-      {
-        $push: { assignedEmployees: { $each: assigned } }, // Append employees to the assignedEmployees array
-      },
-      { new: true }
-    )
-      .populate("client")
-      .populate({
-        path: "assignedEmployees.employee",
-        select: "firstName lastName designation avatar status",
-      });
-
-    if (!updatedProject) {
+    const project = await Project.findById(req.params.id);
+    if (!project) {
       return res.status(404).json({ message: "Project not found" });
     }
 
-    return res.status(200).json(updatedProject); // Ensure the response is returned
+    const existingEmployeeIds = project.assignedEmployees.map((e) =>
+      e.employee.toString()
+    );
+
+    const assigned = [];
+    const skippedEmployees = []; // ✅ Store skipped employeeIds
+
+    for (const { employeeId, role } of employees) {
+      if (existingEmployeeIds.includes(employeeId)) {
+        console.log(`Employee ${employeeId} already assigned. Skipping.`);
+        skippedEmployees.push(employeeId); // ✅ Track skipped
+        continue;
+      }
+
+      const employee = await Employee.findById(employeeId);
+      if (!employee) {
+        throw new Error(`Employee with ID ${employeeId} not found`);
+      }
+
+      // Send email notification
+      if (employee.email) {
+        const html = generateAssignmentEmail(
+          employee.firstName,
+          project.title,
+          role
+        );
+
+        await sendEmail({
+          to: employee.email,
+          subject: "You have been assigned to a new project",
+          html,
+        });
+      }
+
+      assigned.push({ employee: employee._id, role });
+    }
+
+    if (assigned.length > 0) {
+      project.assignedEmployees.push(...assigned);
+      await project.save();
+    }
+
+    const updatedProject = await Project.findById(project._id)
+      .populate("client")
+      .populate({
+        path: "assignedEmployees.employee",
+        select: "firstName lastName department designation avatar status",
+      });
+
+    // ✅ Include skippedEmployees in the response
+    return res.status(200).json({
+      ...updatedProject.toObject(),
+      skippedEmployees,
+    });
   } catch (error) {
     console.error("Error assigning employees:", error);
     return res.status(400).json({ error: error.message });
