@@ -4,7 +4,7 @@ import { safeDeleteFile } from "../utils/cloudinaryHelpers.js";
 
 // Schedule: Runs every day at midnight (server time)
 cron.schedule("0 0 * * *", async () => {
-  const thirtyDaysAgo = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000);
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
   try {
     const expiredInvoices = await Invoice.find({
