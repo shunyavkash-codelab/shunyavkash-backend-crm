@@ -16,6 +16,7 @@ export const createEmployee = async (req, res) => {
       lastName,
       email,
       phone,
+      department,
       designation,
       dateOfJoining,
       salary,
@@ -31,6 +32,7 @@ export const createEmployee = async (req, res) => {
       lastName,
       email,
       phone,
+      department,
       designation,
       dateOfJoining,
       salary,
@@ -65,21 +67,6 @@ export const getAllEmployees = async (req, res) => {
 };
 
 // Get Single Employee
-// export const getEmployeeById = async (req, res) => {
-//   try {
-//     const employee = await Employee.findById(req.params.id);
-//     if (!employee) {
-//       return res.status(404).json({ message: "Employee not found" });
-//     }
-//     return res.status(200).json(employee);
-//   } catch (err) {
-//     return res.status(500).json({
-//       message: "Failed to fetch employee",
-//       error: err.message,
-//     });
-//   }
-// };
-
 export const getEmployeeById = async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id).lean();
@@ -160,26 +147,6 @@ export const updateEmployee = async (req, res) => {
 };
 
 // Delete Employee
-// export const deleteEmployee = async (req, res) => {
-//   try {
-//     const employee = await Employee.findById(req.params.id);
-//     if (!employee) {
-//       return res.status(404).json({ message: "Employee not found" });
-//     }
-
-//     await deleteEmployeeAvatar(employee);
-//     await deleteEmployeeDocuments(employee.documents);
-
-//     await Employee.findByIdAndDelete(req.params.id);
-//     return res.status(200).json({ message: "Employee deleted successfully" });
-//   } catch (err) {
-//     return res.status(500).json({
-//       message: "Failed to delete employee",
-//       error: err.message,
-//     });
-//   }
-// };
-
 export const deleteEmployee = async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id);
