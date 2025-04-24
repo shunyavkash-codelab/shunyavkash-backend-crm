@@ -25,7 +25,12 @@ const employeeSchema = new mongoose.Schema({
     type: String,
   },
   designation: {
-    type: String,
+    type: [String],
+    default: [],
+  },
+  department: {
+    type: [String],
+    default: [],
   },
   dateOfJoining: {
     type: Date,
