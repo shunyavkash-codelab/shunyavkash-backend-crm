@@ -13,7 +13,7 @@ export const registerUser = async (req, res) => {
 
     let user = await User.findOne({ email });
 
-    // If user exists, treat it as login
+    // LOGIN: If user already exists
     if (user) {
       const isPasswordMatch = await comparePassword(password, user.password);
 
@@ -27,13 +27,18 @@ export const registerUser = async (req, res) => {
         user: {
           id: user._id,
           email: user.email,
+          role: user.role,
         },
       });
     }
 
-    // Register new user
+    // REGISTER: Create new user with default role
     const hashedPassword = await hashPassword(password);
-    user = await User.create({ email, password: hashedPassword });
+    user = await User.create({
+      email,
+      password: hashedPassword,
+      role: "Employee", // Default role for all new users
+    });
 
     return res.status(201).json({
       message: "Registration successful",
@@ -41,6 +46,7 @@ export const registerUser = async (req, res) => {
       user: {
         id: user._id,
         email: user.email,
+        role: user.role,
       },
     });
   } catch (error) {
