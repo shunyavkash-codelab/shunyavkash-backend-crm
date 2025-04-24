@@ -16,7 +16,6 @@ export const createEmployee = async (req, res) => {
       lastName,
       email,
       phone,
-      department,
       designation,
       dateOfJoining,
       salary,
@@ -32,7 +31,6 @@ export const createEmployee = async (req, res) => {
       lastName,
       email,
       phone,
-      department,
       designation,
       dateOfJoining,
       salary,
@@ -66,6 +64,22 @@ export const getAllEmployees = async (req, res) => {
   }
 };
 
+// Get Single Employee
+// export const getEmployeeById = async (req, res) => {
+//   try {
+//     const employee = await Employee.findById(req.params.id);
+//     if (!employee) {
+//       return res.status(404).json({ message: "Employee not found" });
+//     }
+//     return res.status(200).json(employee);
+//   } catch (err) {
+//     return res.status(500).json({
+//       message: "Failed to fetch employee",
+//       error: err.message,
+//     });
+//   }
+// };
+
 export const getEmployeeById = async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id).lean();
@@ -96,84 +110,6 @@ export const updateEmployee = async (req, res) => {
     }
 
     const updatedData = { ...req.body };
-
-    // Handle Department
-    if (req.body.department !== undefined) {
-      const isRemoveOperation =
-        Array.isArray(req.body.department) &&
-        Array.isArray(employee.department) &&
-        req.body.department.length < employee.department.length;
-
-      if (isRemoveOperation) {
-        // Direct replacement for tag removal operation
-        updatedData.department = Array.isArray(req.body.department)
-          ? req.body.department
-          : [req.body.department];
-      } else {
-        let existingDepts = employee.department || [];
-        const newDepts = Array.isArray(req.body.department)
-          ? req.body.department
-          : [req.body.department];
-
-        // Append and deduplicate
-        updatedData.department = [...new Set([...existingDepts, ...newDepts])];
-      }
-    }
-    // Handle departmentsToDelete
-    else if (req.body.departmentsToDelete) {
-      let updatedDepartments = employee.department || [];
-
-      // Delete departments if provided
-      const departmentsToDelete = Array.isArray(req.body.departmentsToDelete)
-        ? req.body.departmentsToDelete
-        : [req.body.departmentsToDelete];
-
-      updatedDepartments = updatedDepartments.filter(
-        (dept) => !departmentsToDelete.includes(dept)
-      );
-
-      updatedData.department = updatedDepartments;
-    }
-
-    // Handle Designation
-    if (req.body.designation !== undefined) {
-      const isRemoveOperation =
-        Array.isArray(req.body.designation) &&
-        Array.isArray(employee.designation) &&
-        req.body.designation.length < employee.designation.length;
-
-      if (isRemoveOperation) {
-        // Direct replacement for tag removal operation
-        updatedData.designation = Array.isArray(req.body.designation)
-          ? req.body.designation
-          : [req.body.designation];
-      } else {
-        let existingDesigs = employee.designation || [];
-        const newDesigs = Array.isArray(req.body.designation)
-          ? req.body.designation
-          : [req.body.designation];
-
-        // Append and deduplicate
-        updatedData.designation = [
-          ...new Set([...existingDesigs, ...newDesigs]),
-        ];
-      }
-    }
-    // Handle designationsToDelete
-    else if (req.body.designationsToDelete) {
-      let updatedDesignations = employee.designation || [];
-
-      // Delete designations if provided
-      const designationsToDelete = Array.isArray(req.body.designationsToDelete)
-        ? req.body.designationsToDelete
-        : [req.body.designationsToDelete];
-
-      updatedDesignations = updatedDesignations.filter(
-        (desig) => !designationsToDelete.includes(desig)
-      );
-
-      updatedData.designation = updatedDesignations;
-    }
 
     const newAvatar = req.files?.avatar?.[0];
     if (newAvatar) {
@@ -224,6 +160,26 @@ export const updateEmployee = async (req, res) => {
 };
 
 // Delete Employee
+// export const deleteEmployee = async (req, res) => {
+//   try {
+//     const employee = await Employee.findById(req.params.id);
+//     if (!employee) {
+//       return res.status(404).json({ message: "Employee not found" });
+//     }
+
+//     await deleteEmployeeAvatar(employee);
+//     await deleteEmployeeDocuments(employee.documents);
+
+//     await Employee.findByIdAndDelete(req.params.id);
+//     return res.status(200).json({ message: "Employee deleted successfully" });
+//   } catch (err) {
+//     return res.status(500).json({
+//       message: "Failed to delete employee",
+//       error: err.message,
+//     });
+//   }
+// };
+
 export const deleteEmployee = async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id);
@@ -231,10 +187,25 @@ export const deleteEmployee = async (req, res) => {
       return res.status(404).json({ message: "Employee not found" });
     }
 
+    // Correct nested search without unnecessary ObjectId cast
+    const assignedProjects = await Project.find({
+      "assignedEmployees.employee": employee._id,
+    });
+
+    if (assignedProjects.length > 0) {
+      return res.status(400).json({
+        message: "Cannot delete employee assigned to one or more projects.",
+        assignedProjects: assignedProjects.map((p) => ({
+          id: p._id,
+          title: p.title,
+        })),
+      });
+    }
+
     await deleteEmployeeAvatar(employee);
     await deleteEmployeeDocuments(employee.documents);
-
     await Employee.findByIdAndDelete(req.params.id);
+
     return res.status(200).json({ message: "Employee deleted successfully" });
   } catch (err) {
     return res.status(500).json({
