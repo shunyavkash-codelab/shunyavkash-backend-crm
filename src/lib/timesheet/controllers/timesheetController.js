@@ -1,46 +1,48 @@
 import Timesheet from "../Timesheet.js";
 import Invoice from "../../invoice/Invoice.js";
 
-// Create new timesheet entry
+// Create a new timesheet
 export const createTimesheet = async (req, res) => {
-  const { employee, project, date, hoursWorked, description } = req.body;
-
-  // Validate required fields
-  if (!employee || !project || !date || !hoursWorked) {
-    return res.status(400).json({ message: "All fields are required" });
-  }
-
   try {
-    const timesheet = await Timesheet.create({
-      employee,
+    const { project, date, hoursWorked, description, employee } = req.body;
+
+    const newEntry = new Timesheet({
       project,
       date,
       hoursWorked,
       description,
+      employee: employee || req.user._id, // fallback from token
     });
 
-    return res.status(201).json(timesheet); // Return after successful creation
-  } catch (err) {
-    console.error("Error creating timesheet:", err);
-    return res
-      .status(500)
-      .json({ message: "Error creating timesheet", error: err.message });
+    await newEntry.save();
+
+    const populated = await newEntry.populate("project").execPopulate();
+
+    res.status(201).json(populated);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
 // Get all timesheets
 export const getAllTimesheets = async (req, res) => {
   try {
-    const timesheets = await Timesheet.find()
-      .populate("employee", "email role")
-      .populate("project", "title");
+    // Timesheets for the logged-in employee
+    // const timesheets = await Timesheet.find({ employee: req.user._id })
+    const timesheets = await Timesheet.find({
+      $or: [{ employee: req.user._id }, { employee: null }],
+    })
+      .populate("employee", "name email")
+      .populate("project", "title")
+      .sort({ date: -1 }); // Newest first
 
-    return res.status(200).json(timesheets); // Return the timesheets found
+    return res.status(200).json(timesheets);
   } catch (err) {
     console.error("Error fetching timesheets:", err);
-    return res
-      .status(500)
-      .json({ message: "Error fetching timesheets", error: err.message });
+    return res.status(500).json({
+      message: "Error fetching timesheets",
+      error: err.message,
+    });
   }
 };
 
