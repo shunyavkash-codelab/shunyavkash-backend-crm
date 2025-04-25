@@ -207,12 +207,12 @@ export const assignEmployeesToProject = async (req, res) => {
     );
 
     const assigned = [];
-    const skippedEmployees = []; // ✅ Store skipped employeeIds
+    const skippedEmployees = []; // Store skipped employeeIds
 
     for (const { employeeId, role } of employees) {
       if (existingEmployeeIds.includes(employeeId)) {
         console.log(`Employee ${employeeId} already assigned. Skipping.`);
-        skippedEmployees.push(employeeId); // ✅ Track skipped
+        skippedEmployees.push(employeeId); // Track skipped
         continue;
       }
 
@@ -251,7 +251,7 @@ export const assignEmployeesToProject = async (req, res) => {
         select: "firstName lastName department designation avatar status",
       });
 
-    // ✅ Include skippedEmployees in the response
+    //  Include skippedEmployees in the response
     return res.status(200).json({
       ...updatedProject.toObject(),
       skippedEmployees,
@@ -259,5 +259,50 @@ export const assignEmployeesToProject = async (req, res) => {
   } catch (error) {
     console.error("Error assigning employees:", error);
     return res.status(400).json({ error: error.message });
+  }
+};
+
+// Remove employee for assign into project
+export const removeEmployeeFromProject = async (req, res) => {
+  const { employeeId } = req.body;
+
+  if (!employeeId) {
+    return res.status(400).json({ error: "Employee ID is required" });
+  }
+
+  try {
+    const project = await Project.findById(req.params.id);
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    // Filter out the employee
+    const originalLength = project.assignedEmployees.length;
+    project.assignedEmployees = project.assignedEmployees.filter(
+      (assigned) => assigned.employee.toString() !== employeeId
+    );
+
+    if (project.assignedEmployees.length === originalLength) {
+      return res
+        .status(404)
+        .json({ message: "Employee was not assigned to this project" });
+    }
+
+    await project.save();
+
+    const updatedProject = await Project.findById(project._id)
+      .populate("client")
+      .populate({
+        path: "assignedEmployees.employee",
+        select: "firstName lastName department designation avatar status",
+      });
+
+    return res.status(200).json({
+      message: "Employee removed from project successfully",
+      project: updatedProject,
+    });
+  } catch (error) {
+    console.error("Error removing employee from project:", error);
+    return res.status(500).json({ error: error.message });
   }
 };

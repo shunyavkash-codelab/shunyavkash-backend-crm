@@ -8,6 +8,7 @@ import {
   archiveProject,
   getArchivedProjects,
   assignEmployeesToProject,
+  removeEmployeeFromProject,
 } from "../controllers/projectController.js";
 
 const router = express.Router();
@@ -20,5 +21,6 @@ router.put("/:id", updateProject);
 router.delete("/:id", deleteProject);
 router.patch("/:id/archive", archiveProject);
 router.put("/:id/assign", assignEmployeesToProject);
+router.put("/:id/remove-employee", removeEmployeeFromProject);
 
 export default router;
