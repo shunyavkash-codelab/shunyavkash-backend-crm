@@ -4,22 +4,36 @@ import Invoice from "../../invoice/Invoice.js";
 // Create a new timesheet
 export const createTimesheet = async (req, res) => {
   try {
-    const { project, date, hoursWorked, description, employee } = req.body;
+    const { project, date, hoursWorked, description, user } = req.body;
+    console.log("req.body:", req.body);
+
+    // Check if user is passed in request, else fallback to req.user._id
+    const userId = user || req.user?._id;
+
+    if (!userId) {
+      return res.status(400).json({ message: "user ID is required" });
+    }
 
     const newEntry = new Timesheet({
       project,
       date,
       hoursWorked,
       description,
-      employee: employee || req.user._id, // fallback from token
+      user: userId,
     });
 
+    // Save the new timesheet entry
     await newEntry.save();
 
-    const populated = await newEntry.populate("project").execPopulate();
+    // Populate the necessary fields
+    const populated = await newEntry.populate([
+      { path: "project" },
+      { path: "user", select: "firstName lastName email designation" },
+    ]);
 
     res.status(201).json(populated);
   } catch (error) {
+    console.error("Error creating timesheet:", error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -27,15 +41,14 @@ export const createTimesheet = async (req, res) => {
 // Get all timesheets
 export const getAllTimesheets = async (req, res) => {
   try {
-    // Timesheets for the logged-in employee
-    // const timesheets = await Timesheet.find({ employee: req.user._id })
     const timesheets = await Timesheet.find({
-      $or: [{ employee: req.user._id }, { employee: null }],
+      $or: [{ user: req.user._id }, { user: null }],
     })
-      .populate("employee", "name email")
+      .populate("user", "firstName lastName email role") // Populating user with relevant details
       .populate("project", "title")
       .sort({ date: -1 }); // Newest first
 
+    // console.log("backend timesheets:", timesheets);
     return res.status(200).json(timesheets);
   } catch (err) {
     console.error("Error fetching timesheets:", err);
@@ -52,7 +65,7 @@ export const getTimesheetById = async (req, res) => {
 
   try {
     const timesheet = await Timesheet.findById(id)
-      .populate("employee", "firstName lastName email role")
+      .populate("user", "firstName lastName email role") // Populating user with relevant details
       .populate("project", "title");
 
     if (!timesheet) {

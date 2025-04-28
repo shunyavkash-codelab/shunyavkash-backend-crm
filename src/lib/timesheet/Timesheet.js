@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 
 const timesheetSchema = new mongoose.Schema({
-  employee: {
+  user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Employee", // reference to the employee
+    ref: "User", // reference to the user
     required: true,
   },
   project: {
