@@ -28,7 +28,7 @@ export const createTimesheet = async (req, res) => {
     // Populate the necessary fields
     const populated = await newEntry.populate([
       { path: "project" },
-      { path: "user", select: "firstName lastName email designation" },
+      { path: "user", select: "firstName lastName email role" },
     ]);
 
     res.status(201).json(populated);
