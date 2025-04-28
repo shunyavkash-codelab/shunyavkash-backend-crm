@@ -8,7 +8,7 @@ import {
   deleteTimesheet,
   finalizeTimesheet,
 } from "../controllers/timesheetController.js";
-import protect from "../../../middlewares/authMiddleware.js"; // Uncomment this line
+import protect from "../../../middlewares/authMiddleware.js";
 
 const router = express.Router();
 

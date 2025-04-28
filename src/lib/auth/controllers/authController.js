@@ -90,7 +90,7 @@ export const forgotPassword = async (req, res) => {
   await user.save();
 
   const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
-  const message = `You requested a password reset. Please make a PUT request to: \n\n ${resetUrl}`;
+  const message = `You requested a password reset. Please click on below link: \n\n ${resetUrl}`;
 
   try {
     await sendEmail({
