@@ -4,7 +4,7 @@ import Invoice from "../../invoice/Invoice.js";
 // Create a new timesheet
 export const createTimesheet = async (req, res) => {
   try {
-    const { project, date, hoursWorked, description, user } = req.body;
+    const { project, date, hoursWorked, description, status, user } = req.body;
     console.log("req.body:", req.body);
 
     // Check if user is passed in request, else fallback to req.user._id
@@ -19,6 +19,7 @@ export const createTimesheet = async (req, res) => {
       date,
       hoursWorked,
       description,
+      status,
       user: userId,
     });
 
@@ -44,7 +45,7 @@ export const getAllTimesheets = async (req, res) => {
     const timesheets = await Timesheet.find({
       $or: [{ user: req.user._id }, { user: null }],
     })
-      .populate("user", "firstName lastName email role") // Populating user with relevant details
+      .populate("user", "firstName lastName email role")
       .populate("project", "title")
       .sort({ date: -1 }); // Newest first
 
@@ -65,7 +66,7 @@ export const getTimesheetById = async (req, res) => {
 
   try {
     const timesheet = await Timesheet.findById(id)
-      .populate("user", "firstName lastName email role") // Populating user with relevant details
+      .populate("user", "firstName lastName email role")
       .populate("project", "title");
 
     if (!timesheet) {

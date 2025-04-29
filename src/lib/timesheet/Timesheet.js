@@ -20,11 +20,12 @@ const timesheetSchema = new mongoose.Schema({
     required: true,
   },
   description: {
-    type: String, // what they worked on
+    type: String,
   },
-  isFinalized: {
-    type: Boolean,
-    default: false, // once true, admin can't modify
+  status: {
+    type: String,
+    enum: ["pending", "approved", "rejected", "draft"],
+    default: "pending",
   },
   createdAt: {
     type: Date,
