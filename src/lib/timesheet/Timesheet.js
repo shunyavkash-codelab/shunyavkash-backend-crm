@@ -25,8 +25,12 @@ const timesheetSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["pending", "approved", "rejected", "draft"],
+    enum: ["pending", "approved", "rejected"],
     default: "pending",
+  },
+  isFinalized: {
+    type: Boolean,
+    default: false,
   },
   createdAt: {
     type: Date,
