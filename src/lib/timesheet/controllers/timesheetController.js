@@ -85,20 +85,22 @@ export const getTimesheetById = async (req, res) => {
 // Update timesheet by ID
 export const updateTimesheet = async (req, res) => {
   const { id } = req.params;
-  const { description, ...rest } = req.body;
 
   try {
-    const updatedDescription = Array.isArray(req.body.description)
-      ? req.body.description
-      : req.body.description
-      ? req.body.description.split(",").map((t) => t.trim())
-      : [];
+    const updateData = { ...req.body };
 
-    const timesheet = await Timesheet.findByIdAndUpdate(
-      id,
-      { ...rest, description: updatedDescription },
-      { new: true }
-    );
+    if (updateData.description !== undefined) {
+      updateData.description = Array.isArray(updateData.description)
+        ? updateData.description
+        : updateData.description.split(",").map((t) => t.trim());
+    }
+
+    // Update and then populate
+    const timesheet = await Timesheet.findByIdAndUpdate(id, updateData, {
+      new: true,
+    })
+      .populate("user")
+      .populate("project"); // <-- Populated: user and project
 
     if (!timesheet) {
       return res.status(404).json({ message: "Timesheet not found" });
