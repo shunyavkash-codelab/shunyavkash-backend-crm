@@ -9,7 +9,6 @@ const timesheetSchema = new mongoose.Schema({
   employee: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Employee",
-    required: true, // if applicable
   },
   project: {
     type: mongoose.Schema.Types.ObjectId,
