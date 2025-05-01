@@ -34,15 +34,6 @@ export const generateInvoiceHTML = (invoice, client, timesheets) => {
         projectName = "Unpopulated Project (ID only)";
       }
 
-      let employeeName = "Not Assigned";
-      if (ts.employee && typeof ts.employee === "object") {
-        const first = ts.employee.firstName || "";
-        const last = ts.employee.lastName || "";
-        employeeName = `${first} ${last}`.trim() || "Unnamed Employee";
-      } else if (typeof ts.employee === "string") {
-        employeeName = "Unpopulated Employee (ID only)";
-      }
-
       const description = ts.description || "No description";
       const hours =
         typeof ts.hoursWorked === "number" ? ts.hoursWorked.toFixed(2) : "0.00";
@@ -51,7 +42,7 @@ export const generateInvoiceHTML = (invoice, client, timesheets) => {
       <tr>
         <td>${formattedDate}</td>
         <td>${projectName}</td>
-        <td>${employeeName}</td>
+      
         <td>${description}</td>
         <td>${hours}</td>
       </tr>`;
@@ -172,7 +163,7 @@ export const generateInvoiceHTML = (invoice, client, timesheets) => {
             <tr>
               <th>Date</th>
               <th>Project</th>
-              <th>Employee</th>
+            
               <th>Description</th>
               <th>Hours</th>
             </tr>
