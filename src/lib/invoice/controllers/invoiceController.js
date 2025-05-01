@@ -7,6 +7,21 @@ import {
   uploadToCloudinary,
   safeDeleteFile,
 } from "../../../utils/cloudinaryHelpers.js";
+import cloudinary from "../../../configs/cloudinary.js";
+
+export const checkFileExists = async (publicId, resourceType = "raw") => {
+  try {
+    const result = await cloudinary.api.resource(publicId, {
+      resource_type: resourceType,
+    });
+    return !!result;
+  } catch (error) {
+    if (error.http_code === 404) {
+      return false;
+    }
+    throw error;
+  }
+};
 
 // Create Invoice
 export const createInvoice = async (req, res) => {
@@ -25,9 +40,10 @@ export const createInvoice = async (req, res) => {
     const timesheets = await Timesheet.find({
       _id: { $in: timesheetIds },
       isFinalized: true,
-    })
-      .populate("project")
-      .populate("employee");
+    }).populate([
+      { path: "project", select: "title" },
+      // { path: "employee", select: "firstName lastName email" },
+    ]);
 
     if (timesheets.length === 0) {
       return res
@@ -66,6 +82,7 @@ export const createInvoice = async (req, res) => {
 
     invoice.pdfUrl = url;
     invoice.cloudinaryPublicId = public_id;
+    invoice.pdfExists = true;
     await invoice.save();
 
     return res.status(201).json(invoice);
@@ -98,6 +115,9 @@ export const regenerateInvoicePDF = async (req, res) => {
 
     if (invoice.cloudinaryPublicId) {
       await safeDeleteFile(invoice.cloudinaryPublicId, "raw");
+      invoice.pdfUrl = null;
+      invoice.cloudinaryPublicId = null;
+      invoice.pdfExists = false;
     }
 
     const html = generateInvoiceHTML(
@@ -123,6 +143,7 @@ export const regenerateInvoicePDF = async (req, res) => {
 
     invoice.pdfUrl = url;
     invoice.cloudinaryPublicId = public_id;
+    invoice.pdfExists = true;
     await invoice.save();
 
     return res
@@ -136,7 +157,6 @@ export const regenerateInvoicePDF = async (req, res) => {
   }
 };
 
-// Get All Invoices
 export const getInvoices = async (req, res) => {
   try {
     const invoices = await Invoice.find()
@@ -146,7 +166,31 @@ export const getInvoices = async (req, res) => {
         populate: { path: "project", select: "title" },
       });
 
-    return res.status(200).json(invoices);
+    // Check PDF existence for each invoice
+    const invoicesWithPdfStatus = await Promise.all(
+      invoices.map(async (invoice) => {
+        if (invoice.cloudinaryPublicId) {
+          try {
+            const exists = await checkFileExists(invoice.cloudinaryPublicId);
+            invoice.pdfExists = exists;
+            if (!exists) {
+              invoice.pdfUrl = null;
+              invoice.cloudinaryPublicId = null;
+              await invoice.save();
+            }
+          } catch (error) {
+            console.error("Error checking PDF existence:", error);
+            invoice.pdfExists = false;
+            await invoice.save();
+          }
+        } else {
+          invoice.pdfExists = false;
+        }
+        return invoice;
+      })
+    );
+
+    return res.status(200).json(invoicesWithPdfStatus);
   } catch (error) {
     return res
       .status(500)
@@ -154,7 +198,6 @@ export const getInvoices = async (req, res) => {
   }
 };
 
-// Get Single Invoice
 export const getInvoiceById = async (req, res) => {
   try {
     const invoice = await Invoice.findById(req.params.id)
@@ -169,6 +212,26 @@ export const getInvoiceById = async (req, res) => {
 
     if (!invoice) {
       return res.status(404).json({ message: "Invoice not found" });
+    }
+
+    // Check PDF existence and update database accordingly
+    if (invoice.cloudinaryPublicId) {
+      try {
+        const exists = await checkFileExists(invoice.cloudinaryPublicId);
+        invoice.pdfExists = exists;
+        if (!exists) {
+          invoice.pdfUrl = null;
+          invoice.cloudinaryPublicId = null;
+          await invoice.save();
+        }
+      } catch (error) {
+        console.error("Error checking PDF existence:", error);
+        invoice.pdfExists = false;
+        await invoice.save();
+      }
+    } else {
+      invoice.pdfExists = false;
+      await invoice.save();
     }
 
     return res.status(200).json(invoice);
@@ -219,6 +282,9 @@ export const deleteInvoice = async (req, res) => {
 
     if (invoice.cloudinaryPublicId) {
       await safeDeleteFile(invoice.cloudinaryPublicId, "raw");
+      invoice.pdfUrl = null;
+      invoice.cloudinaryPublicId = null;
+      invoice.pdfExists = false;
     }
 
     await Invoice.findByIdAndDelete(req.params.id);
