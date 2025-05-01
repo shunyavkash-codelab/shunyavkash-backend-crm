@@ -71,7 +71,7 @@ const invoiceSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["Draft", "Finalized", "Paid"],
+      enum: ["Draft", "Unpaid", "Paid"],
       default: "Draft",
     },
     issuedDate: {
@@ -85,6 +85,10 @@ const invoiceSchema = new mongoose.Schema(
     pdfUrl: {
       type: String,
       required: false, // Not required for draft invoices
+    },
+    pdfExists: {
+      type: Boolean,
+      default: true,
     },
     cloudinaryPublicId: {
       type: String,
