@@ -1,8 +1,8 @@
 import Project from '../Project.js';
 import Employee from '../../employee/Employee.js';
-import { sendEmail } from '../../../utils/sendEmail.js';
+import { sendEmail } from '../../../services/sendEmail.service.js';
 import { generateAssignmentEmail } from '../../../utils/emailTemplates.js';
-import logger from '../../../utils/loggerUtils.js';
+import logger from '../../../utils/logger.utils.js';
 
 // Create a new project
 export const createProject = async (req, res) => {

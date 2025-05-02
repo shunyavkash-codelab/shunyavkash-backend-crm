@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { MONGO_URI } from './environmentConfig.js';
-import logger from '../utils/loggerUtils.js';
+import logger from '../utils/logger.utils.js';
 
 const connectDB = () => {
   mongoose

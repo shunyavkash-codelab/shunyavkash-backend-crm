@@ -1,5 +1,5 @@
 import cloudinary from '../configs/cloudinary.js';
-import logger from './loggerUtils.js';
+import logger from './logger.utils.js';
 
 const getResourceTypeFromPublicId = publicId => {
   return publicId?.endsWith('.pdf') ? 'raw' : 'image';
@@ -45,23 +45,6 @@ export const uploadToCloudinary = async (
   }
 };
 
-// Delete from Cloudinary
-// export const deleteFileFromCloudinary = async (
-//   publicId,
-//   resourceType = "image"
-// ) => {
-//   if (!publicId) return { result: "skipped" };
-//   try {
-//     const result = await cloudinary.uploader.destroy(publicId, {
-//       resource_type: resourceType,
-//     });
-//     return result;
-//   } catch (err) {
-//     logger.error("Error deleting file from Cloudinary:", err);
-//     throw new Error("Failed to delete file from Cloudinary");
-//   }
-// };
-
 export const deleteFileFromCloudinary = async (publicId, resourceType) => {
   if (!publicId) return { result: 'skipped' };
   try {
@@ -77,17 +60,6 @@ export const deleteFileFromCloudinary = async (publicId, resourceType) => {
   }
 };
 
-// Safe delete file
-// export const safeDeleteFile = async (publicId, resourceType = "image") => {
-//   if (!publicId) return { result: "skipped" };
-//   try {
-//     logger.log("Deleting file:", publicId);
-//     return await deleteFileFromCloudinary(publicId, resourceType);
-//   } catch (err) {
-//     logger.error("Error deleting file:", err);
-//     return { result: "error", error: err.message };
-//   }
-// };
 export const safeDeleteFile = async (publicId, resourceType) => {
   if (!publicId) return { result: 'skipped' };
   try {

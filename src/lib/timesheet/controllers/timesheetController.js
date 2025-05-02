@@ -1,6 +1,6 @@
 import Timesheet from '../Timesheet.js';
 import Invoice from '../../invoice/Invoice.js';
-import logger from '../../../utils/loggerUtils.js';
+import logger from '../../../utils/logger.utils.js';
 
 // Create a new timesheet
 export const createTimesheet = async (req, res) => {

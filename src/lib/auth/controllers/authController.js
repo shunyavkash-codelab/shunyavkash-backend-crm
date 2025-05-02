@@ -1,10 +1,10 @@
 import crypto from 'crypto';
 import User from '../User.js';
-import { hashPassword, comparePassword } from '../../../utils/bcryptUtils.js';
+import { hashPassword, comparePassword } from '../../../utils/bcrypt.utils.js';
 import generateToken from '../../../utils/generateToken.js';
-import { sendEmail } from '../../../utils/sendEmail.js';
+import { sendEmail } from '../../../services/sendEmail.service.js';
 import { FRONTEND_URL } from '../../../configs/environmentConfig.js';
-import logger from '../../../utils/loggerUtils.js';
+import logger from '../../../utils/logger.utils.js';
 
 // Register or Login user
 export const registerUser = async (req, res) => {

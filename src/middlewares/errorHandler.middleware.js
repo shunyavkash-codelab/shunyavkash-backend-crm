@@ -1,4 +1,4 @@
-import logger from '../utils/loggerUtils.js';
+import logger from '../utils/logger.utils.js';
 import SendResponse from '../utils/sendResponseUtils.js';
 
 // eslint-disable-next-line no-unused-vars

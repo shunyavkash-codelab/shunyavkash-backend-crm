@@ -1,32 +1,32 @@
-import express from "express";
-import { interviewUpload } from "../../../middlewares/upload.js";
+import express from 'express';
+import { interviewUpload } from '../../../middlewares/upload.js';
 import {
   createInterview,
   getAllInterviews,
   getInterviewById,
   updateInterview,
-  deleteInterview,
-} from "../controllers/interviewController.js";
-import protect from "../../../middlewares/authMiddleware.js";
-import authorizeRoles from "../../../middlewares/roleMiddleware.js";
+  deleteInterview
+} from '../controllers/interviewController.js';
+import protect from '../../../middlewares/auth.middleware.js';
+import authorizeRoles from '../../../middlewares/role.middleware.js';
 
 const router = express.Router();
 router.use(protect);
 
-router.get("/", authorizeRoles("HR", "Admin", "Employee"), getAllInterviews);
-router.get("/:id", authorizeRoles("HR", "Admin", "Employee"), getInterviewById);
+router.get('/', authorizeRoles('HR', 'Admin', 'Employee'), getAllInterviews);
+router.get('/:id', authorizeRoles('HR', 'Admin', 'Employee'), getInterviewById);
 router.post(
-  "/",
-  authorizeRoles("HR", "Admin"),
+  '/',
+  authorizeRoles('HR', 'Admin'),
   interviewUpload,
   createInterview
 );
 router.put(
-  "/:id",
-  authorizeRoles("HR", "Admin"),
+  '/:id',
+  authorizeRoles('HR', 'Admin'),
   interviewUpload,
   updateInterview
 );
-router.delete("/:id", authorizeRoles("HR", "Admin"), deleteInterview);
+router.delete('/:id', authorizeRoles('HR', 'Admin'), deleteInterview);
 
 export default router;

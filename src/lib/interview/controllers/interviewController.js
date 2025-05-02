@@ -1,7 +1,7 @@
 import Interview from '../Interview.js';
 import Employee from '../../employee/Employee.js';
 import { deleteFileFromCloudinary } from '../../../utils/cloudinaryHelpers.js';
-import logger from '../../../utils/loggerUtils.js';
+import logger from '../../../utils/logger.utils.js';
 
 // 🔹 Create Interview
 export const createInterview = async (req, res) => {

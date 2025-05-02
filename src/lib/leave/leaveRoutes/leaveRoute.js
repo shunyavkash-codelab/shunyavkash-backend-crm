@@ -1,40 +1,40 @@
-import express from "express";
+import express from 'express';
 import {
   applyLeave,
   getMyLeaves,
   getAllLeaves,
   updateLeaveStatus,
-  deleteLeave,
-} from "../controllers/leaveController.js";
+  deleteLeave
+} from '../controllers/leaveController.js';
 
-import protect from "../../../middlewares/authMiddleware.js";
-import authorizeRoles from "../../../middlewares/roleMiddleware.js";
+import protect from '../../../middlewares/auth.middleware.js';
+import authorizeRoles from '../../../middlewares/role.middleware.js';
 
 const router = express.Router();
 
 router.post(
-  "/",
+  '/',
   protect,
-  authorizeRoles("Employee", "Admin", "HR"),
+  authorizeRoles('Employee', 'Admin', 'HR'),
   applyLeave
 );
 router.get(
-  "/",
+  '/',
   protect,
-  authorizeRoles("Employee", "Admin", "HR"),
+  authorizeRoles('Employee', 'Admin', 'HR'),
   getMyLeaves
 );
-router.get("/all", protect, authorizeRoles("Admin", "HR"), getAllLeaves);
+router.get('/all', protect, authorizeRoles('Admin', 'HR'), getAllLeaves);
 router.put(
-  "/status/:id",
+  '/status/:id',
   protect,
-  authorizeRoles("Admin", "HR"),
+  authorizeRoles('Admin', 'HR'),
   updateLeaveStatus
 );
 router.delete(
-  "/:id",
+  '/:id',
   protect,
-  authorizeRoles("Employee", "Admin", "HR"),
+  authorizeRoles('Employee', 'Admin', 'HR'),
   deleteLeave
 );
 
