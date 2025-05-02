@@ -1,12 +1,12 @@
 import Invoice from '../Invoice.js';
 import Timesheet from '../../timesheet/Timesheet.js';
 import Client from '../../client/Client.js';
-import { generateInvoiceHTML } from '../../../utils/invoiceTemplate.js';
+import { generateInvoiceHTML } from '../../../services/template/invoiceTemplate.js';
 import { generatePDFFileObject } from '../../../utils/pdfGenerator.js';
 import {
   uploadToCloudinary,
   safeDeleteFile
-} from '../../../utils/cloudinaryHelpers.js';
+} from '../../employee/helpers/cloudinary.js';
 import cloudinary from '../../../configs/cloudinary.js';
 import logger from '../../../utils/logger.util.js';
 

@@ -1,6 +1,6 @@
 import Interview from '../Interview.js';
 import Employee from '../../employee/Employee.js';
-import { deleteFileFromCloudinary } from '../../../utils/cloudinaryHelpers.js';
+import { deleteFileFromCloudinary } from '../../employee/helpers/cloudinary.js';
 import logger from '../../../utils/logger.util.js';
 
 // 🔹 Create Interview

@@ -6,7 +6,7 @@ import {
   deleteEmployeeAvatar,
   deleteEmployeeDocuments,
   safeDeleteFile
-} from '../../../utils/cloudinaryHelpers.js';
+} from '../helpers/cloudinary.js';
 import logger from '../../../utils/logger.util.js';
 
 // Create Employee

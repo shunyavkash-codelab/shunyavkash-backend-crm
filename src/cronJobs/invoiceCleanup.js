@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 import Invoice from '../lib/invoice/Invoice.js';
-import { safeDeleteFile } from '../utils/cloudinaryHelpers.js';
+import { safeDeleteFile } from '../lib/employee/helpers/cloudinary.js';
 import logger from '../utils/logger.util.js';
 
 // Schedule: Runs every day at midnight (server time)
