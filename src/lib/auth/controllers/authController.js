@@ -54,7 +54,7 @@ export const registerUser = async (req, res) => {
   } catch (error) {
     console.error("Error in registerUser:", error.message);
     return res.status(500).json({
-      message: "Something went wrong",
+      message: "Error in registering new user",
       error: error.message,
     });
   }
@@ -115,10 +115,7 @@ export const resetPassword = async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
 
-  const hashedToken = crypto
-    .createHash("sha256")
-    .update(token)
-    .digest("hex");
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
   const user = await User.findOne({
     resetPasswordToken: hashedToken,
