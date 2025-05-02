@@ -1,18 +1,19 @@
-import Invoice from "../Invoice.js";
-import Timesheet from "../../timesheet/Timesheet.js";
-import Client from "../../client/Client.js";
-import { generateInvoiceHTML } from "../../../utils/invoiceTemplate.js";
-import { generatePDFFileObject } from "../../../utils/pdfGenerator.js";
+import Invoice from '../Invoice.js';
+import Timesheet from '../../timesheet/Timesheet.js';
+import Client from '../../client/Client.js';
+import { generateInvoiceHTML } from '../../../utils/invoiceTemplate.js';
+import { generatePDFFileObject } from '../../../utils/pdfGenerator.js';
 import {
   uploadToCloudinary,
-  safeDeleteFile,
-} from "../../../utils/cloudinaryHelpers.js";
-import cloudinary from "../../../configs/cloudinary.js";
+  safeDeleteFile
+} from '../../../utils/cloudinaryHelpers.js';
+import cloudinary from '../../../configs/cloudinary.js';
+import logger from '../../../utils/loggerUtils.js';
 
-export const checkFileExists = async (publicId, resourceType = "raw") => {
+export const checkFileExists = async (publicId, resourceType = 'raw') => {
   try {
     const result = await cloudinary.api.resource(publicId, {
-      resource_type: resourceType,
+      resource_type: resourceType
     });
     return !!result;
   } catch (error) {
@@ -29,26 +30,26 @@ export const createInvoice = async (req, res) => {
     const { clientId, timesheetIds, ratePerHour, dueDate } = req.body;
 
     if (!clientId || !timesheetIds || !ratePerHour) {
-      return res.status(400).json({ message: "Missing required fields" });
+      return res.status(400).json({ message: 'Missing required fields' });
     }
 
     const client = await Client.findById(clientId);
     if (!client) {
-      return res.status(404).json({ message: "Client not found" });
+      return res.status(404).json({ message: 'Client not found' });
     }
 
     const timesheets = await Timesheet.find({
       _id: { $in: timesheetIds },
-      isFinalized: true,
+      isFinalized: true
     }).populate([
-      { path: "project", select: "title" },
+      { path: 'project', select: 'title' }
       // { path: "employee", select: "firstName lastName email" },
     ]);
 
     if (timesheets.length === 0) {
       return res
         .status(400)
-        .json({ message: "No valid finalized timesheets found" });
+        .json({ message: 'No valid finalized timesheets found' });
     }
 
     const totalHours = timesheets.reduce((sum, ts) => sum + ts.hoursWorked, 0);
@@ -60,7 +61,7 @@ export const createInvoice = async (req, res) => {
       totalHours,
       ratePerHour,
       totalAmount,
-      dueDate,
+      dueDate
     });
 
     const html = generateInvoiceHTML(invoice, client, timesheets);
@@ -68,15 +69,15 @@ export const createInvoice = async (req, res) => {
 
     const { url, public_id } = await uploadToCloudinary(
       fileObject,
-      "invoices",
+      'invoices',
       {
-        resource_type: "raw",
-        format: "pdf",
-        type: "upload",
-        tags: ["invoice"],
+        resource_type: 'raw',
+        format: 'pdf',
+        type: 'upload',
+        tags: ['invoice'],
         context: { alt: `Invoice PDF ${invoice._id}` },
         invalidate: true,
-        expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
       }
     );
 
@@ -87,10 +88,10 @@ export const createInvoice = async (req, res) => {
 
     return res.status(201).json(invoice);
   } catch (error) {
-    console.error("Invoice creation error:", error);
+    logger.error('Invoice creation error:', error);
     return res
       .status(500)
-      .json({ message: "Failed to create invoice", error: error.message });
+      .json({ message: 'Failed to create invoice', error: error.message });
   }
 };
 
@@ -100,21 +101,21 @@ export const regenerateInvoicePDF = async (req, res) => {
     const { id } = req.params;
 
     const invoice = await Invoice.findById(id)
-      .populate("client")
+      .populate('client')
       .populate({
-        path: "timesheets",
+        path: 'timesheets',
         populate: [
-          { path: "project", select: "title" },
-          { path: "employee", select: "firstName lastName" },
-        ],
+          { path: 'project', select: 'title' },
+          { path: 'employee', select: 'firstName lastName' }
+        ]
       });
 
     if (!invoice) {
-      return res.status(404).json({ message: "Invoice not found" });
+      return res.status(404).json({ message: 'Invoice not found' });
     }
 
     if (invoice.cloudinaryPublicId) {
-      await safeDeleteFile(invoice.cloudinaryPublicId, "raw");
+      await safeDeleteFile(invoice.cloudinaryPublicId, 'raw');
       invoice.pdfUrl = null;
       invoice.cloudinaryPublicId = null;
       invoice.pdfExists = false;
@@ -129,15 +130,15 @@ export const regenerateInvoicePDF = async (req, res) => {
 
     const { url, public_id } = await uploadToCloudinary(
       fileObject,
-      "invoices",
+      'invoices',
       {
-        resource_type: "raw",
-        format: "pdf",
-        type: "upload",
-        tags: ["invoice"],
+        resource_type: 'raw',
+        format: 'pdf',
+        type: 'upload',
+        tags: ['invoice'],
         context: { alt: `Invoice PDF ${invoice._id}` },
         invalidate: true,
-        expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
       }
     );
 
@@ -148,27 +149,27 @@ export const regenerateInvoicePDF = async (req, res) => {
 
     return res
       .status(200)
-      .json({ message: "Invoice PDF regenerated", invoice });
+      .json({ message: 'Invoice PDF regenerated', invoice });
   } catch (error) {
-    console.error("PDF regeneration error:", error);
+    logger.error('PDF regeneration error:', error);
     return res
       .status(500)
-      .json({ message: "Failed to regenerate invoice", error: error.message });
+      .json({ message: 'Failed to regenerate invoice', error: error.message });
   }
 };
 
 export const getInvoices = async (req, res) => {
   try {
     const invoices = await Invoice.find()
-      .populate("client", "name email")
+      .populate('client', 'name email')
       .populate({
-        path: "timesheets",
-        populate: { path: "project", select: "title" },
+        path: 'timesheets',
+        populate: { path: 'project', select: 'title' }
       });
 
     // Check PDF existence for each invoice
     const invoicesWithPdfStatus = await Promise.all(
-      invoices.map(async (invoice) => {
+      invoices.map(async invoice => {
         if (invoice.cloudinaryPublicId) {
           try {
             const exists = await checkFileExists(invoice.cloudinaryPublicId);
@@ -179,7 +180,7 @@ export const getInvoices = async (req, res) => {
               await invoice.save();
             }
           } catch (error) {
-            console.error("Error checking PDF existence:", error);
+            logger.error('Error checking PDF existence:', error);
             invoice.pdfExists = false;
             await invoice.save();
           }
@@ -194,24 +195,24 @@ export const getInvoices = async (req, res) => {
   } catch (error) {
     return res
       .status(500)
-      .json({ message: "Failed to fetch invoices", error: error.message });
+      .json({ message: 'Failed to fetch invoices', error: error.message });
   }
 };
 
 export const getInvoiceById = async (req, res) => {
   try {
     const invoice = await Invoice.findById(req.params.id)
-      .populate("client", "name email")
+      .populate('client', 'name email')
       .populate({
-        path: "timesheets",
+        path: 'timesheets',
         populate: [
-          { path: "project", select: "title" },
-          { path: "employee", select: "firstName lastName" },
-        ],
+          { path: 'project', select: 'title' },
+          { path: 'employee', select: 'firstName lastName' }
+        ]
       });
 
     if (!invoice) {
-      return res.status(404).json({ message: "Invoice not found" });
+      return res.status(404).json({ message: 'Invoice not found' });
     }
 
     // Check PDF existence and update database accordingly
@@ -225,7 +226,7 @@ export const getInvoiceById = async (req, res) => {
           await invoice.save();
         }
       } catch (error) {
-        console.error("Error checking PDF existence:", error);
+        logger.error('Error checking PDF existence:', error);
         invoice.pdfExists = false;
         await invoice.save();
       }
@@ -238,7 +239,7 @@ export const getInvoiceById = async (req, res) => {
   } catch (error) {
     return res
       .status(500)
-      .json({ message: "Failed to fetch invoice", error: error.message });
+      .json({ message: 'Failed to fetch invoice', error: error.message });
   }
 };
 
@@ -248,9 +249,9 @@ export const updateInvoiceStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    const allowedStatuses = ["Draft", "Finalized", "Paid"];
+    const allowedStatuses = ['Draft', 'Finalized', 'Paid'];
     if (!allowedStatuses.includes(status)) {
-      return res.status(400).json({ message: "Invalid status value" });
+      return res.status(400).json({ message: 'Invalid status value' });
     }
 
     const invoice = await Invoice.findByIdAndUpdate(
@@ -260,14 +261,14 @@ export const updateInvoiceStatus = async (req, res) => {
     );
 
     if (!invoice) {
-      return res.status(404).json({ message: "Invoice not found" });
+      return res.status(404).json({ message: 'Invoice not found' });
     }
 
     return res.status(200).json(invoice);
   } catch (error) {
     return res
       .status(500)
-      .json({ message: "Failed to update invoice", error: error.message });
+      .json({ message: 'Failed to update invoice', error: error.message });
   }
 };
 
@@ -277,11 +278,11 @@ export const deleteInvoice = async (req, res) => {
     const invoice = await Invoice.findById(req.params.id);
 
     if (!invoice) {
-      return res.status(404).json({ message: "Invoice not found" });
+      return res.status(404).json({ message: 'Invoice not found' });
     }
 
     if (invoice.cloudinaryPublicId) {
-      await safeDeleteFile(invoice.cloudinaryPublicId, "raw");
+      await safeDeleteFile(invoice.cloudinaryPublicId, 'raw');
       invoice.pdfUrl = null;
       invoice.cloudinaryPublicId = null;
       invoice.pdfExists = false;
@@ -289,11 +290,11 @@ export const deleteInvoice = async (req, res) => {
 
     await Invoice.findByIdAndDelete(req.params.id);
 
-    return res.status(200).json({ message: "Invoice deleted successfully" });
+    return res.status(200).json({ message: 'Invoice deleted successfully' });
   } catch (error) {
-    console.error("Invoice deletion error:", error);
+    logger.error('Invoice deletion error:', error);
     return res
       .status(500)
-      .json({ message: "Failed to delete invoice", error: error.message });
+      .json({ message: 'Failed to delete invoice', error: error.message });
   }
 };

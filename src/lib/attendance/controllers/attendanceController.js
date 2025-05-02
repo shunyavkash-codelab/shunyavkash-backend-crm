@@ -1,4 +1,5 @@
-import Attendance from "../Attendance.js";
+import logger from '../../../utils/loggerUtils.js';
+import Attendance from '../Attendance.js';
 
 // 1. Employee Check-In
 export const checkIn = async (req, res) => {
@@ -8,23 +9,23 @@ export const checkIn = async (req, res) => {
 
     const existing = await Attendance.findOne({
       employee: employeeId,
-      date: today,
+      date: today
     });
 
     if (existing) {
-      return res.status(400).json({ message: "Already checked in for today" });
+      return res.status(400).json({ message: 'Already checked in for today' });
     }
 
     const attendance = await Attendance.create({
       employee: employeeId,
       date: today,
       checkIn: new Date(),
-      status: "Present",
+      status: 'Present'
     });
 
     return res.status(201).json(attendance);
   } catch (error) {
-    console.error("Error in checkIn:", error.message);
+    logger.error('Error in checkIn:', error.message);
     return res.status(500).json({ error: error.message });
   }
 };
@@ -37,25 +38,25 @@ export const checkOut = async (req, res) => {
 
     const attendance = await Attendance.findOne({
       employee: employeeId,
-      date: today,
+      date: today
     });
 
     if (!attendance) {
       return res
         .status(404)
-        .json({ message: "No check-in record found for today" });
+        .json({ message: 'No check-in record found for today' });
     }
 
     if (attendance.checkOut) {
-      return res.status(400).json({ message: "Already checked out" });
+      return res.status(400).json({ message: 'Already checked out' });
     }
 
     attendance.checkOut = new Date();
     await attendance.save();
 
-    return res.json({ message: "Checked out successfully", attendance });
+    return res.json({ message: 'Checked out successfully', attendance });
   } catch (error) {
-    console.error("Error in checkOut:", error.message);
+    logger.error('Error in checkOut:', error.message);
     return res.status(500).json({ error: error.message });
   }
 };
@@ -68,25 +69,25 @@ export const markLeave = async (req, res) => {
 
     const alreadyMarked = await Attendance.findOne({
       employee: employeeId,
-      date: formattedDate,
+      date: formattedDate
     });
 
     if (alreadyMarked) {
       return res
         .status(400)
-        .json({ message: "Attendance already exists for this date" });
+        .json({ message: 'Attendance already exists for this date' });
     }
 
     const leave = await Attendance.create({
       employee: employeeId,
       date: formattedDate,
-      status: "Leave",
-      note,
+      status: 'Leave',
+      note
     });
 
     return res.status(201).json(leave);
   } catch (error) {
-    console.error("Error in markLeave:", error.message);
+    logger.error('Error in markLeave:', error.message);
     return res.status(500).json({ error: error.message });
   }
 };
@@ -95,13 +96,13 @@ export const markLeave = async (req, res) => {
 export const getAllAttendance = async (req, res) => {
   try {
     const records = await Attendance.find().populate(
-      "employee",
-      "firstName lastName email"
+      'employee',
+      'firstName lastName email'
     );
 
     return res.json(records);
   } catch (error) {
-    console.error("Error in getAllAttendance:", error.message);
+    logger.error('Error in getAllAttendance:', error.message);
     return res.status(500).json({ error: error.message });
   }
 };
@@ -112,12 +113,12 @@ export const getAttendanceByEmployee = async (req, res) => {
     const { employeeId } = req.params;
 
     const records = await Attendance.find({ employee: employeeId }).sort({
-      date: -1,
+      date: -1
     });
 
     return res.json(records);
   } catch (error) {
-    console.error("Error in getAttendanceByEmployee:", error.message);
+    logger.error('Error in getAttendanceByEmployee:', error.message);
     return res.status(500).json({ error: error.message });
   }
 };
@@ -126,9 +127,9 @@ export const getAttendanceByEmployee = async (req, res) => {
 export const deleteAttendance = async (req, res) => {
   try {
     await Attendance.findByIdAndDelete(req.params.id);
-    return res.json({ message: "Attendance deleted" });
+    return res.json({ message: 'Attendance deleted' });
   } catch (error) {
-    console.error("Error in deleteAttendance:", error.message);
+    logger.error('Error in deleteAttendance:', error.message);
     return res.status(500).json({ error: error.message });
   }
 };

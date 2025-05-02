@@ -4,6 +4,7 @@ import { hashPassword, comparePassword } from '../../../utils/bcryptUtils.js';
 import generateToken from '../../../utils/generateToken.js';
 import { sendEmail } from '../../../utils/sendEmail.js';
 import { FRONTEND_URL } from '../../../configs/environmentConfig.js';
+import logger from '../../../utils/loggerUtils.js';
 
 // Register or Login user
 export const registerUser = async (req, res) => {
@@ -53,7 +54,7 @@ export const registerUser = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error in registerUser:', error.message);
+    logger.error('Error in registerUser:', error.message);
     return res.status(500).json({
       message: 'Something went wrong',
       error: error.message
@@ -70,7 +71,7 @@ export const getLoggedInUser = async (req, res) => {
 
     return res.status(200).json(req.user);
   } catch (error) {
-    console.error('Error in getLoggedInUser:', error.message);
+    logger.error('Error in getLoggedInUser:', error.message);
     return res.status(500).json({
       message: 'Failed to get user',
       error: error.message

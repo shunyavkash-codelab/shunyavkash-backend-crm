@@ -1,6 +1,7 @@
-import Interview from "../Interview.js";
-import Employee from "../../employee/Employee.js";
-import { deleteFileFromCloudinary } from "../../../utils/cloudinaryHelpers.js";
+import Interview from '../Interview.js';
+import Employee from '../../employee/Employee.js';
+import { deleteFileFromCloudinary } from '../../../utils/cloudinaryHelpers.js';
+import logger from '../../../utils/loggerUtils.js';
 
 // 🔹 Create Interview
 export const createInterview = async (req, res) => {
@@ -15,12 +16,12 @@ export const createInterview = async (req, res) => {
       status,
       mode,
       location,
-      feedback,
+      feedback
     } = req.body;
 
     const interviewerExists = await Employee.findById(interviewer);
     if (!interviewerExists) {
-      return res.status(404).json({ message: "Interviewer not found" });
+      return res.status(404).json({ message: 'Interviewer not found' });
     }
 
     const resumeFile = req.files?.resume?.[0];
@@ -39,16 +40,16 @@ export const createInterview = async (req, res) => {
       resume: resumeFile
         ? { name: resumeFile.originalname, url: resumeFile.path }
         : undefined,
-      resumePublicId: resumeFile?.filename || resumeFile?.public_id,
+      resumePublicId: resumeFile?.filename || resumeFile?.public_id
     });
 
     const savedInterview = await newInterview.save();
     return res.status(201).json(savedInterview);
   } catch (err) {
-    console.error("Error in createInterview:", err);
+    logger.error('Error in createInterview:', err);
     return res
       .status(400)
-      .json({ message: "Failed to create interview", error: err.message });
+      .json({ message: 'Failed to create interview', error: err.message });
   }
 };
 
@@ -56,15 +57,15 @@ export const createInterview = async (req, res) => {
 export const getAllInterviews = async (req, res) => {
   try {
     const interviews = await Interview.find().populate(
-      "interviewer",
-      "firstName lastName email"
+      'interviewer',
+      'firstName lastName email'
     );
     return res.json(interviews);
   } catch (err) {
-    console.error("Error in getAllInterviews:", err);
+    logger.error('Error in getAllInterviews:', err);
     return res
       .status(500)
-      .json({ message: "Failed to fetch interviews", error: err.message });
+      .json({ message: 'Failed to fetch interviews', error: err.message });
   }
 };
 
@@ -72,18 +73,18 @@ export const getAllInterviews = async (req, res) => {
 export const getInterviewById = async (req, res) => {
   try {
     const interview = await Interview.findById(req.params.id).populate(
-      "interviewer",
-      "firstName lastName email"
+      'interviewer',
+      'firstName lastName email'
     );
     if (!interview) {
-      return res.status(404).json({ message: "Interview not found" });
+      return res.status(404).json({ message: 'Interview not found' });
     }
     return res.json(interview);
   } catch (err) {
-    console.error("Error in getInterviewById:", err);
+    logger.error('Error in getInterviewById:', err);
     return res
       .status(500)
-      .json({ message: "Failed to fetch interview", error: err.message });
+      .json({ message: 'Failed to fetch interview', error: err.message });
   }
 };
 
@@ -92,7 +93,7 @@ export const updateInterview = async (req, res) => {
   try {
     const interview = await Interview.findById(req.params.id);
     if (!interview) {
-      return res.status(404).json({ message: "Interview not found" });
+      return res.status(404).json({ message: 'Interview not found' });
     }
 
     const newResumeFile = req.files?.resume?.[0];
@@ -100,10 +101,10 @@ export const updateInterview = async (req, res) => {
     // 🗑️ Delete old resume if new uploaded
     if (newResumeFile && interview.resumePublicId) {
       try {
-        console.log("Deleting old resume:", interview.resumePublicId);
+        logger.log('Deleting old resume:', interview.resumePublicId);
         await deleteFileFromCloudinary(interview.resumePublicId);
       } catch (err) {
-        console.error("Error deleting old resume:", err);
+        logger.error('Error deleting old resume:', err);
       }
     }
 
@@ -118,7 +119,7 @@ export const updateInterview = async (req, res) => {
       status,
       mode,
       location,
-      feedback,
+      feedback
     } = req.body;
 
     interview.candidateName = candidateName || interview.candidateName;
@@ -135,7 +136,7 @@ export const updateInterview = async (req, res) => {
     if (newResumeFile) {
       interview.resume = {
         name: newResumeFile.originalname,
-        url: newResumeFile.path,
+        url: newResumeFile.path
       };
       interview.resumePublicId =
         newResumeFile.filename || newResumeFile.public_id;
@@ -144,10 +145,10 @@ export const updateInterview = async (req, res) => {
     const updatedInterview = await interview.save();
     return res.json(updatedInterview);
   } catch (err) {
-    console.error("Error in updateInterview:", err);
+    logger.error('Error in updateInterview:', err);
     return res
       .status(400)
-      .json({ message: "Failed to update interview", error: err.message });
+      .json({ message: 'Failed to update interview', error: err.message });
   }
 };
 
@@ -156,25 +157,25 @@ export const deleteInterview = async (req, res) => {
   try {
     const interview = await Interview.findById(req.params.id);
     if (!interview) {
-      return res.status(404).json({ message: "Interview not found" });
+      return res.status(404).json({ message: 'Interview not found' });
     }
 
     // Delete resume from Cloudinary if it exists
     if (interview.resumePublicId) {
       try {
-        console.log("Deleting resume:", interview.resumePublicId);
+        logger.log('Deleting resume:', interview.resumePublicId);
         await deleteFileFromCloudinary(interview.resumePublicId);
       } catch (err) {
-        console.error("Error deleting resume:", err);
+        logger.error('Error deleting resume:', err);
       }
     }
 
     await Interview.findByIdAndDelete(req.params.id);
-    return res.json({ message: "Interview deleted successfully" });
+    return res.json({ message: 'Interview deleted successfully' });
   } catch (err) {
-    console.error("Error in deleteInterview:", err);
+    logger.error('Error in deleteInterview:', err);
     return res
       .status(500)
-      .json({ message: "Failed to delete interview", error: err.message });
+      .json({ message: 'Failed to delete interview', error: err.message });
   }
 };

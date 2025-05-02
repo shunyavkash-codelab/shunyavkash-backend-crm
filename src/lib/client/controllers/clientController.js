@@ -1,5 +1,6 @@
-import Client from "../Client.js";
-import Project from "../../project/Project.js";
+import Client from '../Client.js';
+import Project from '../../project/Project.js';
+import logger from '../../../utils/loggerUtils.js';
 
 // Create Client
 export const createClient = async (req, res) => {
@@ -7,7 +8,7 @@ export const createClient = async (req, res) => {
     const client = await Client.create(req.body);
     return res.status(201).json(client);
   } catch (error) {
-    console.error("[Create Client Error]:", error);
+    logger.error('[Create Client Error]:', error);
     return res.status(400).json({ error: error.message });
   }
 };
@@ -18,7 +19,7 @@ export const getAllClients = async (req, res) => {
     const clients = await Client.find();
     return res.status(200).json(clients);
   } catch (error) {
-    console.error("[Get All Clients Error]:", error);
+    logger.error('[Get All Clients Error]:', error);
     return res.status(500).json({ error: error.message });
   }
 };
@@ -28,11 +29,11 @@ export const getSingleClient = async (req, res) => {
   try {
     const client = await Client.findById(req.params.id);
     if (!client) {
-      return res.status(404).json({ message: "Client not found" });
+      return res.status(404).json({ message: 'Client not found' });
     }
     return res.status(200).json(client);
   } catch (error) {
-    console.error("[Get Single Client Error]:", error);
+    logger.error('[Get Single Client Error]:', error);
     return res.status(500).json({ error: error.message });
   }
 };
@@ -41,16 +42,16 @@ export const getSingleClient = async (req, res) => {
 export const updateClient = async (req, res) => {
   try {
     const client = await Client.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      new: true
     });
 
     if (!client) {
-      return res.status(404).json({ message: "Client not found" });
+      return res.status(404).json({ message: 'Client not found' });
     }
 
     return res.status(200).json(client);
   } catch (error) {
-    console.error("[Update Client Error]:", error);
+    logger.error('[Update Client Error]:', error);
     return res.status(400).json({ error: error.message });
   }
 };
@@ -66,8 +67,7 @@ export const deleteClient = async (req, res) => {
     if (linkedProjects) {
       return res.status(400).json({
         success: false,
-        error:
-          "Cannot delete client. Projects are associated with this client.",
+        error: 'Cannot delete client. Projects are associated with this client.'
       });
     }
 
@@ -75,15 +75,15 @@ export const deleteClient = async (req, res) => {
     if (!deletedClient) {
       return res
         .status(404)
-        .json({ success: false, message: "Client not found" });
+        .json({ success: false, message: 'Client not found' });
     }
 
     return res.status(200).json({
       success: true,
-      message: "Client deleted successfully.",
+      message: 'Client deleted successfully.'
     });
   } catch (error) {
-    console.error("[Delete Client Error]:", error);
+    logger.error('[Delete Client Error]:', error);
     return res.status(500).json({ success: false, error: error.message });
   }
 };

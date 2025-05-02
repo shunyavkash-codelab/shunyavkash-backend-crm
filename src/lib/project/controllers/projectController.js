@@ -1,7 +1,8 @@
-import Project from "../Project.js";
-import Employee from "../../employee/Employee.js";
-import { sendEmail } from "../../../utils/sendEmail.js";
-import { generateAssignmentEmail } from "../../../utils/emailTemplates.js";
+import Project from '../Project.js';
+import Employee from '../../employee/Employee.js';
+import { sendEmail } from '../../../utils/sendEmail.js';
+import { generateAssignmentEmail } from '../../../utils/emailTemplates.js';
+import logger from '../../../utils/loggerUtils.js';
 
 // Create a new project
 export const createProject = async (req, res) => {
@@ -9,7 +10,7 @@ export const createProject = async (req, res) => {
     const project = await Project.create(req.body);
     return res.status(201).json(project); // Ensure the response is returned
   } catch (error) {
-    console.error("Error creating project:", error);
+    logger.error('Error creating project:', error);
     return res.status(400).json({ error: error.message });
   }
 };
@@ -18,12 +19,12 @@ export const createProject = async (req, res) => {
 export const getAllProjects = async (req, res) => {
   try {
     const projects = await Project.find({ isArchived: false }).populate(
-      "client",
-      "name"
+      'client',
+      'name'
     );
     return res.status(200).json(projects); // Ensure the response is returned
   } catch (error) {
-    console.error("Error fetching projects:", error);
+    logger.error('Error fetching projects:', error);
     return res.status(500).json({ error: error.message });
   }
 };
@@ -32,22 +33,22 @@ export const getAllProjects = async (req, res) => {
 export const getProjectById = async (req, res) => {
   try {
     const project = await Project.findById(req.params.id)
-      .populate("client")
+      .populate('client')
       .populate({
-        path: "assignedEmployees.employee",
-        select: "firstName lastName department designation avatar status",
+        path: 'assignedEmployees.employee',
+        select: 'firstName lastName department designation avatar status'
       });
 
     if (!project) {
-      return res.status(404).json({ message: "Project not found" });
+      return res.status(404).json({ message: 'Project not found' });
     }
 
     return res.status(200).json(project); // Ensure the response is returned
   } catch (error) {
-    console.error("Error fetching project:", error);
+    logger.error('Error fetching project:', error);
     return res
       .status(500)
-      .json({ message: "Internal server error", error: error.message });
+      .json({ message: 'Internal server error', error: error.message });
   }
 };
 
@@ -55,16 +56,16 @@ export const getProjectById = async (req, res) => {
 export const updateProject = async (req, res) => {
   try {
     const project = await Project.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
+      new: true
     });
 
     if (!project) {
-      return res.status(404).json({ message: "Project not found" });
+      return res.status(404).json({ message: 'Project not found' });
     }
 
     return res.status(200).json(project); // Ensure the response is returned
   } catch (error) {
-    console.error("Error updating project:", error);
+    logger.error('Error updating project:', error);
     return res.status(400).json({ error: error.message });
   }
 };
@@ -75,12 +76,12 @@ export const deleteProject = async (req, res) => {
     const project = await Project.findByIdAndDelete(req.params.id);
 
     if (!project) {
-      return res.status(404).json({ message: "Project not found" });
+      return res.status(404).json({ message: 'Project not found' });
     }
 
-    return res.status(200).json({ message: "Project deleted" }); // Ensure the response is returned
+    return res.status(200).json({ message: 'Project deleted' }); // Ensure the response is returned
   } catch (error) {
-    console.error("Error deleting project:", error);
+    logger.error('Error deleting project:', error);
     return res.status(500).json({ error: error.message });
   }
 };
@@ -91,7 +92,7 @@ export const archiveProject = async (req, res) => {
     const project = await Project.findById(req.params.id);
 
     if (!project) {
-      return res.status(404).json({ message: "Project not found" });
+      return res.status(404).json({ message: 'Project not found' });
     }
 
     project.isArchived = !project.isArchived; // Toggle archive status
@@ -99,12 +100,12 @@ export const archiveProject = async (req, res) => {
 
     return res.status(200).json({
       message: `Project ${
-        project.isArchived ? "archived" : "unarchived"
+        project.isArchived ? 'archived' : 'unarchived'
       } successfully`,
-      project,
+      project
     });
   } catch (error) {
-    console.error("Error archiving project:", error);
+    logger.error('Error archiving project:', error);
     return res.status(500).json({ error: error.message });
   }
 };
@@ -113,12 +114,12 @@ export const archiveProject = async (req, res) => {
 export const getArchivedProjects = async (req, res) => {
   try {
     const archivedProjects = await Project.find({ isArchived: true }).populate(
-      "client",
-      "name"
+      'client',
+      'name'
     );
     return res.status(200).json(archivedProjects); // Ensure the response is returned
   } catch (error) {
-    console.error("Error fetching archived projects:", error);
+    logger.error('Error fetching archived projects:', error);
     return res.status(500).json({ error: error.message });
   }
 };
@@ -144,7 +145,7 @@ export const getArchivedProjects = async (req, res) => {
 
 //     for (const { employeeId, role } of employees) {
 //       if (existingEmployeeIds.includes(employeeId)) {
-//         console.log(`Employee ${employeeId} already assigned. Skipping.`);
+//         logger.log(`Employee ${employeeId} already assigned. Skipping.`);
 //         continue;
 //       }
 
@@ -185,7 +186,7 @@ export const getArchivedProjects = async (req, res) => {
 
 //     return res.status(200).json(updatedProject);
 //   } catch (error) {
-//     console.error("Error assigning employees:", error);
+//     logger.error("Error assigning employees:", error);
 //     return res.status(400).json({ error: error.message });
 //   }
 // };
@@ -193,16 +194,16 @@ export const assignEmployeesToProject = async (req, res) => {
   const { employees } = req.body;
 
   if (!employees || employees.length === 0) {
-    return res.status(400).json({ error: "No employees provided" });
+    return res.status(400).json({ error: 'No employees provided' });
   }
 
   try {
     const project = await Project.findById(req.params.id);
     if (!project) {
-      return res.status(404).json({ message: "Project not found" });
+      return res.status(404).json({ message: 'Project not found' });
     }
 
-    const existingEmployeeIds = project.assignedEmployees.map((e) =>
+    const existingEmployeeIds = project.assignedEmployees.map(e =>
       e.employee.toString()
     );
 
@@ -211,7 +212,7 @@ export const assignEmployeesToProject = async (req, res) => {
 
     for (const { employeeId, role } of employees) {
       if (existingEmployeeIds.includes(employeeId)) {
-        console.log(`Employee ${employeeId} already assigned. Skipping.`);
+        logger.log(`Employee ${employeeId} already assigned. Skipping.`);
         skippedEmployees.push(employeeId); // Track skipped
         continue;
       }
@@ -231,8 +232,8 @@ export const assignEmployeesToProject = async (req, res) => {
 
         await sendEmail({
           to: employee.email,
-          subject: "You have been assigned to a new project",
-          html,
+          subject: 'You have been assigned to a new project',
+          html
         });
       }
 
@@ -245,19 +246,19 @@ export const assignEmployeesToProject = async (req, res) => {
     }
 
     const updatedProject = await Project.findById(project._id)
-      .populate("client")
+      .populate('client')
       .populate({
-        path: "assignedEmployees.employee",
-        select: "firstName lastName department designation avatar status",
+        path: 'assignedEmployees.employee',
+        select: 'firstName lastName department designation avatar status'
       });
 
     //  Include skippedEmployees in the response
     return res.status(200).json({
       ...updatedProject.toObject(),
-      skippedEmployees,
+      skippedEmployees
     });
   } catch (error) {
-    console.error("Error assigning employees:", error);
+    logger.error('Error assigning employees:', error);
     return res.status(400).json({ error: error.message });
   }
 };
@@ -267,42 +268,42 @@ export const removeEmployeeFromProject = async (req, res) => {
   const { employeeId } = req.body;
 
   if (!employeeId) {
-    return res.status(400).json({ error: "Employee ID is required" });
+    return res.status(400).json({ error: 'Employee ID is required' });
   }
 
   try {
     const project = await Project.findById(req.params.id);
     if (!project) {
-      return res.status(404).json({ message: "Project not found" });
+      return res.status(404).json({ message: 'Project not found' });
     }
 
     // Filter out the employee
     const originalLength = project.assignedEmployees.length;
     project.assignedEmployees = project.assignedEmployees.filter(
-      (assigned) => assigned.employee.toString() !== employeeId
+      assigned => assigned.employee.toString() !== employeeId
     );
 
     if (project.assignedEmployees.length === originalLength) {
       return res
         .status(404)
-        .json({ message: "Employee was not assigned to this project" });
+        .json({ message: 'Employee was not assigned to this project' });
     }
 
     await project.save();
 
     const updatedProject = await Project.findById(project._id)
-      .populate("client")
+      .populate('client')
       .populate({
-        path: "assignedEmployees.employee",
-        select: "firstName lastName department designation avatar status",
+        path: 'assignedEmployees.employee',
+        select: 'firstName lastName department designation avatar status'
       });
 
     return res.status(200).json({
-      message: "Employee removed from project successfully",
-      project: updatedProject,
+      message: 'Employee removed from project successfully',
+      project: updatedProject
     });
   } catch (error) {
-    console.error("Error removing employee from project:", error);
+    logger.error('Error removing employee from project:', error);
     return res.status(500).json({ error: error.message });
   }
 };

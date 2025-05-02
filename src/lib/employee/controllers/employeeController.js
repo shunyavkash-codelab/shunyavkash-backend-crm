@@ -1,12 +1,13 @@
-import Employee from "../Employee.js";
-import Project from "../../project/Project.js";
+import Employee from '../Employee.js';
+import Project from '../../project/Project.js';
 import {
   processUploadedFile,
   processUploadedFiles,
   deleteEmployeeAvatar,
   deleteEmployeeDocuments,
-  safeDeleteFile,
-} from "../../../utils/cloudinaryHelpers.js";
+  safeDeleteFile
+} from '../../../utils/cloudinaryHelpers.js';
+import logger from '../../../utils/loggerUtils.js';
 
 // Create Employee
 export const createEmployee = async (req, res) => {
@@ -21,7 +22,7 @@ export const createEmployee = async (req, res) => {
       dateOfJoining,
       salary,
       status,
-      address,
+      address
     } = req.body;
 
     const avatarFile = processUploadedFile(req.files?.avatar?.[0]);
@@ -38,17 +39,17 @@ export const createEmployee = async (req, res) => {
       salary,
       status,
       address,
-      avatar: avatarFile?.url || "",
-      avatarPublicId: avatarFile?.publicId || "",
-      documents,
+      avatar: avatarFile?.url || '',
+      avatarPublicId: avatarFile?.publicId || '',
+      documents
     });
 
     const savedEmployee = await newEmployee.save();
     return res.status(201).json(savedEmployee);
   } catch (err) {
     return res.status(400).json({
-      message: "Failed to create employee",
-      error: err.message,
+      message: 'Failed to create employee',
+      error: err.message
     });
   }
 };
@@ -60,8 +61,8 @@ export const getAllEmployees = async (req, res) => {
     return res.status(200).json(employees);
   } catch (err) {
     return res.status(500).json({
-      message: "Failed to fetch employees",
-      error: err.message,
+      message: 'Failed to fetch employees',
+      error: err.message
     });
   }
 };
@@ -71,19 +72,19 @@ export const getEmployeeById = async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id).lean();
     if (!employee) {
-      return res.status(404).json({ message: "Employee not found" });
+      return res.status(404).json({ message: 'Employee not found' });
     }
 
     // Fetch assigned projects
     const projects = await Project.find({
-      assignedEmployees: employee._id,
-    }).select("name description status");
+      assignedEmployees: employee._id
+    }).select('name description status');
 
     return res.status(200).json({ ...employee, assignedProjects: projects });
   } catch (err) {
     return res.status(500).json({
-      message: "Failed to fetch employee",
-      error: err.message,
+      message: 'Failed to fetch employee',
+      error: err.message
     });
   }
 };
@@ -93,7 +94,7 @@ export const updateEmployee = async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id);
     if (!employee) {
-      return res.status(404).json({ message: "Employee not found" });
+      return res.status(404).json({ message: 'Employee not found' });
     }
 
     const updatedData = { ...req.body };
@@ -108,9 +109,9 @@ export const updateEmployee = async (req, res) => {
 
     let documentsToDelete = [];
     try {
-      documentsToDelete = JSON.parse(req.body.documentsToDelete || "[]");
+      documentsToDelete = JSON.parse(req.body.documentsToDelete || '[]');
     } catch (e) {
-      console.warn("Invalid documentsToDelete format:", e.message);
+      logger.warn('Invalid documentsToDelete format:', e.message);
     }
 
     if (documentsToDelete.length > 0) {
@@ -118,7 +119,7 @@ export const updateEmployee = async (req, res) => {
         await safeDeleteFile(publicId);
       }
       updatedData.documents = employee.documents.filter(
-        (doc) => !documentsToDelete.includes(doc.publicId)
+        doc => !documentsToDelete.includes(doc.publicId)
       );
     }
 
@@ -127,7 +128,7 @@ export const updateEmployee = async (req, res) => {
       const processedNewDocs = processUploadedFiles(newDocs);
       updatedData.documents = [
         ...(updatedData.documents || employee.documents),
-        ...processedNewDocs,
+        ...processedNewDocs
       ];
     }
 
@@ -140,8 +141,8 @@ export const updateEmployee = async (req, res) => {
     return res.status(200).json(updatedEmployee);
   } catch (err) {
     return res.status(400).json({
-      message: "Failed to update employee",
-      error: err.message,
+      message: 'Failed to update employee',
+      error: err.message
     });
   }
 };
@@ -151,21 +152,21 @@ export const deleteEmployee = async (req, res) => {
   try {
     const employee = await Employee.findById(req.params.id);
     if (!employee) {
-      return res.status(404).json({ message: "Employee not found" });
+      return res.status(404).json({ message: 'Employee not found' });
     }
 
     // Correct nested search without unnecessary ObjectId cast
     const assignedProjects = await Project.find({
-      "assignedEmployees.employee": employee._id,
+      'assignedEmployees.employee': employee._id
     });
 
     if (assignedProjects.length > 0) {
       return res.status(400).json({
-        message: "Cannot delete employee assigned to one or more projects.",
-        assignedProjects: assignedProjects.map((p) => ({
+        message: 'Cannot delete employee assigned to one or more projects.',
+        assignedProjects: assignedProjects.map(p => ({
           id: p._id,
-          title: p.title,
-        })),
+          title: p.title
+        }))
       });
     }
 
@@ -173,11 +174,11 @@ export const deleteEmployee = async (req, res) => {
     await deleteEmployeeDocuments(employee.documents);
     await Employee.findByIdAndDelete(req.params.id);
 
-    return res.status(200).json({ message: "Employee deleted successfully" });
+    return res.status(200).json({ message: 'Employee deleted successfully' });
   } catch (err) {
     return res.status(500).json({
-      message: "Failed to delete employee",
-      error: err.message,
+      message: 'Failed to delete employee',
+      error: err.message
     });
   }
 };
