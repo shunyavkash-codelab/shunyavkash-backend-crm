@@ -10,17 +10,24 @@ import {
   assignEmployeesToProject,
   removeEmployeeFromProject,
 } from "../controllers/projectController.js";
+import protect from "../../../middlewares/authMiddleware.js";
+import authorizeRoles from "../../../middlewares/roleMiddleware.js";
 
 const router = express.Router();
+router.use(protect);
 
-router.post("/", createProject);
-router.get("/", getAllProjects);
-router.get("/archived", getArchivedProjects);
-router.get("/:id", getProjectById);
-router.put("/:id", updateProject);
-router.delete("/:id", deleteProject);
-router.patch("/:id/archive", archiveProject);
-router.put("/:id/assign", assignEmployeesToProject);
-router.put("/:id/remove-employee", removeEmployeeFromProject);
+router.post("/", authorizeRoles("Admin"), createProject);
+router.get("/", authorizeRoles("Admin"), getAllProjects);
+router.get("/archived", authorizeRoles("Admin"), getArchivedProjects);
+router.get("/:id", authorizeRoles("Admin", "Employee"), getProjectById);
+router.put("/:id", authorizeRoles("Admin"), updateProject);
+router.delete("/:id", authorizeRoles("Admin"), deleteProject);
+router.patch("/:id/archive", authorizeRoles("Admin"), archiveProject);
+router.put("/:id/assign", authorizeRoles("Admin"), assignEmployeesToProject);
+router.put(
+  "/:id/remove-employee",
+  authorizeRoles("Admin"),
+  removeEmployeeFromProject
+);
 
 export default router;
