@@ -1,12 +1,13 @@
 import mongoose from 'mongoose';
 import { MONGO_URI } from './environmentConfig.js';
+import logger from '../utils/loggerUtils.js';
 
 const connectDB = () => {
   mongoose
     .connect(MONGO_URI)
-    .then(() => console.log('Database Connected successfully'))
+    .then(() => logger.log('Database Connected successfully'))
     .catch(err => {
-      console.error(' MongoDB Connection Error:', err.message);
+      logger.error(' MongoDB Connection Error:', err.message);
       process.exit(1);
     });
 };
