@@ -1,7 +1,7 @@
 import Project from '../Project.js';
 import Employee from '../../employee/Employee.js';
 import { sendEmail } from '../../../services/sendEmail.service.js';
-import { generateAssignmentEmail } from '../../../services/template/emailTemplates.js';
+import { generateAssignmentEmail } from '../../../services/template/emailTemplates.service.js';
 import logger from '../../../utils/logger.util.js';
 
 // Create a new project

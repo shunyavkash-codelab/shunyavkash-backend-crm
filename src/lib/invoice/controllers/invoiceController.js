@@ -1,7 +1,7 @@
 import Invoice from '../Invoice.js';
 import Timesheet from '../../timesheet/Timesheet.js';
 import Client from '../../client/Client.js';
-import { generateInvoiceHTML } from '../../../services/template/invoiceTemplate.js';
+import { generateInvoiceHTML } from '../../../services/template/invoiceTemplate.service.js';
 import { generatePDFFileObject } from '../../../utils/pdfGenerator.js';
 import {
   uploadToCloudinary,
