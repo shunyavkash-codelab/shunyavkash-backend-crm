@@ -7,7 +7,6 @@ import { FRONTEND_URL } from '../../../configs/environmentConfig.js';
 import logger from '../../../utils/logger.util.js';
 import SendResponse from '../../../utils/sendResponse.util.js';
 
-// Register or Login user
 export const registerUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -60,22 +59,6 @@ export const registerUser = async (req, res) => {
       `Error in registerUser:`,
       error.message
     );
-  }
-};
-
-// Get Logged-In User Info (via middleware auth)
-export const getLoggedInUser = async (req, res) => {
-  try {
-    if (!req.user) {
-      return res.status(401).json({ message: 'Unauthorized' });
-    }
-    return res.status(200).json(req.user);
-  } catch (error) {
-    logger.error('Error in getLoggedInUser:', error.message);
-    return res.status(500).json({
-      message: 'Failed to get user',
-      error: error.message
-    });
   }
 };
 

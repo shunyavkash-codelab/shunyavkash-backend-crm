@@ -3,36 +3,32 @@ import { JWT_SECRET } from '../configs/environmentConfig.js';
 import { verifyToken } from '../utils/jwt.util.js';
 import SendResponse from '../utils/sendResponse.util.js';
 
-const protect = async (req, res, next) => {
-  let token;
+export const auth = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
 
-  // Check if token is present in headers
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith('Bearer')
-  ) {
-    try {
-      // Extract token
-      token = req.headers.authorization.split(' ')[1];
-      console.log('token', token);
-      if (!token) {
-        return SendResponse(res, 400, false, `Token not found!`);
-      }
-      // Verify token
-      const decoded = verifyToken(token, JWT_SECRET);
-      console.log('decoded', decoded);
-
-      // Attach user to request
-      req.user = await User.findById(decoded.id || decoded._id).select(
-        '-password'
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return SendResponse(
+        res,
+        401,
+        false,
+        'Authorization token missing or invalid'
       );
-      next();
-    } catch (err) {
-      res.status(401).json({ message: 'Not authorized, token failed' });
     }
-  } else {
-    res.status(401).json({ message: 'Not authorized, no token' });
+
+    const token = authHeader.split(' ')[1];
+    const decoded = verifyToken(token, JWT_SECRET);
+
+    const user = await User.findById(decoded.id).select('-password');
+    if (!user) {
+      return SendResponse(res, 401, false, 'User not found');
+    }
+
+    req.user = user;
+    next();
+  } catch (error) {
+    return SendResponse(res, 401, false, 'Unauthorized', {
+      error: error.message
+    });
   }
 };
-
-export default protect;
