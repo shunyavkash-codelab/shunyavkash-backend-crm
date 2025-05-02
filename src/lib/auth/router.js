@@ -4,10 +4,11 @@ import {
   registerUser,
   forgotPassword,
   resetPassword
-} from '../controllers/authController.js';
-import protect from '../../../middlewares/auth.middleware.js';
+} from './controllers/registerUser.controller.js';
+import protect from '../../middlewares/auth.middleware.js';
 
 const router = express.Router();
+// remove route end point register
 router.post('/register', registerUser);
 router.get('/me', protect, getLoggedInUser);
 

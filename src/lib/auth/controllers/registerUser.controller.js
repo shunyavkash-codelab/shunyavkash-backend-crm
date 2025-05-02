@@ -1,10 +1,11 @@
 import crypto from 'crypto';
 import User from '../User.js';
 import { hashPassword, comparePassword } from '../../../utils/bcrypt.util.js';
-import generateToken from '../../../utils/jwt.util.js';
+import { generateToken } from '../../../utils/jwt.util.js';
 import { sendEmail } from '../../../services/sendEmail.service.js';
 import { FRONTEND_URL } from '../../../configs/environmentConfig.js';
 import logger from '../../../utils/logger.util.js';
+import SendResponse from '../../../utils/sendResponse.util.js';
 
 // Register or Login user
 export const registerUser = async (req, res) => {
@@ -12,7 +13,7 @@ export const registerUser = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ message: 'All fields are required' });
+      return SendResponse(res, 400, false, `All fields are required`);
     }
 
     let user = await User.findOne({ email });
@@ -24,16 +25,18 @@ export const registerUser = async (req, res) => {
       if (!isPasswordMatch) {
         return res.status(401).json({ message: 'Password not matched' });
       }
+      delete user.password;
 
-      return res.status(200).json({
-        message: 'User already exists. Logged in successfully.',
-        token: generateToken(user._id),
-        user: {
-          id: user._id,
-          email: user.email,
-          role: user.role
+      return SendResponse(
+        res,
+        200,
+        true,
+        `User already exists. Logged in successfully`,
+        {
+          token: generateToken(user._id),
+          user
         }
-      });
+      );
     }
 
     // REGISTER: Create new user with default role
@@ -43,22 +46,20 @@ export const registerUser = async (req, res) => {
       password: hashedPassword,
       role: 'Employee' // Default role for all new users
     });
-
-    return res.status(201).json({
-      message: 'Registration successful',
+    delete user.password;
+    return SendResponse(res, 201, true, `Registration successful`, {
       token: generateToken(user._id),
-      user: {
-        id: user._id,
-        email: user.email,
-        role: user.role
-      }
+      user
     });
   } catch (error) {
     logger.error('Error in registerUser:', error.message);
-    return res.status(500).json({
-      message: 'Something went wrong',
-      error: error.message
-    });
+    return SendResponse(
+      res,
+      500,
+      false,
+      `Error in registerUser:`,
+      error.message
+    );
   }
 };
 
@@ -68,7 +69,6 @@ export const getLoggedInUser = async (req, res) => {
     if (!req.user) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
-
     return res.status(200).json(req.user);
   } catch (error) {
     logger.error('Error in getLoggedInUser:', error.message);
