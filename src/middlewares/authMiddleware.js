@@ -1,5 +1,6 @@
-import jwt from "jsonwebtoken";
-import User from "../lib/auth/User.js";
+import jwt from 'jsonwebtoken';
+import User from '../lib/auth/User.js';
+import { JWT_SECRET } from '../configs/environmentConfig.js';
 
 const protect = async (req, res, next) => {
   let token;
@@ -7,26 +8,26 @@ const protect = async (req, res, next) => {
   // Check if token is present in headers
   if (
     req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer")
+    req.headers.authorization.startsWith('Bearer')
   ) {
     try {
       // Extract token
-      token = req.headers.authorization.split(" ")[1];
+      token = req.headers.authorization.split(' ')[1];
 
       // Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, JWT_SECRET);
 
       // Attach user to request
       req.user = await User.findById(decoded.id || decoded._id).select(
-        "-password"
+        '-password'
       );
 
       next(); // Proceed to the route
     } catch (err) {
-      res.status(401).json({ message: "Not authorized, token failed" });
+      res.status(401).json({ message: 'Not authorized, token failed' });
     }
   } else {
-    res.status(401).json({ message: "Not authorized, no token" });
+    res.status(401).json({ message: 'Not authorized, no token' });
   }
 };
 

@@ -1,25 +1,32 @@
-import mongoose from "mongoose";
-import dotenv from "dotenv";
-import User from "../lib/auth/User.js";
-import { hashPassword } from "../utils/bcryptUtils.js";
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import User from '../lib/auth/User.js';
+import { hashPassword } from '../utils/bcryptUtils.js';
+import {
+  ADMIN_EMAIL,
+  ADMIN_PASSWORD,
+  HR_EMAIL,
+  HR_PASSWORD,
+  MONGO_URI
+} from '../configs/environmentConfig.js';
 
 dotenv.config(); // Load from .env
 
-await mongoose.connect(process.env.MONGO_URI);
-console.log("MongoDB connected");
+await mongoose.connect(MONGO_URI);
+console.log('MongoDB connected');
 
 // Predefined users
 const predefinedUsers = [
   {
-    role: "Admin",
-    email: process.env.ADMIN_EMAIL,
-    password: process.env.ADMIN_PASSWORD,
+    role: 'Admin',
+    email: ADMIN_EMAIL,
+    password: ADMIN_PASSWORD
   },
   {
-    role: "HR",
-    email: process.env.HR_EMAIL,
-    password: process.env.HR_PASSWORD,
-  },
+    role: 'HR',
+    email: HR_EMAIL,
+    password: HR_PASSWORD
+  }
 ];
 
 for (const userData of predefinedUsers) {
@@ -52,11 +59,11 @@ for (const userData of predefinedUsers) {
     await User.create({
       role: userData.role,
       email: userData.email,
-      password: await hashPassword(userData.password),
+      password: await hashPassword(userData.password)
     });
     console.log(`Created ${userData.role}`);
   }
 }
 
 mongoose.disconnect();
-console.log("🚀 Seeding complete");
+console.log('🚀 Seeding complete');

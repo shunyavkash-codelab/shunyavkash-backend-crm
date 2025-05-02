@@ -1,29 +1,44 @@
-import cron from "node-cron";
-import Invoice from "../lib/invoice/Invoice.js";
-import { safeDeleteFile } from "../utils/cloudinaryHelpers.js";
+import cron from 'node-cron';
+import Invoice from '../lib/invoice/Invoice.js';
+import { safeDeleteFile } from '../utils/cloudinaryHelpers.js';
 
 // Schedule: Runs every day at midnight (server time)
-cron.schedule("0 0 * * *", async () => {
+cron.schedule('0 0 * * *', async () => {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
   try {
     const expiredInvoices = await Invoice.find({
       createdAt: { $lt: thirtyDaysAgo },
-      cloudinaryPublicId: { $ne: null },
+      cloudinaryPublicId: { $ne: null }
     });
-
-    for (const invoice of expiredInvoices) {
-      await safeDeleteFile(invoice.cloudinaryPublicId, "raw");
-
-      invoice.cloudinaryPublicId = null;
-      invoice.pdfUrl = null;
-      await invoice.save();
+    if (!expiredInvoices.length) {
+      console.log('[Cron] No expired invoices found for cleanup.');
+      return;
     }
+    const results = await Promise.allSettled(
+      expiredInvoices.map(async invoice => {
+        try {
+          await safeDeleteFile(invoice.cloudinaryPublicId, 'raw');
+
+          invoice.cloudinaryPublicId = null;
+          invoice.pdfUrl = null;
+          await invoice.save();
+
+          return { status: 'fulfilled', id: invoice._id };
+        } catch (err) {
+          return { status: 'rejected', id: invoice._id, reason: err.message };
+        }
+      })
+    );
+
+    // Log results
+    const success = results.filter(r => r.status === 'fulfilled');
+    const failed = results.filter(r => r.status === 'rejected');
 
     console.log(
-      `[Cron] Cleaned up ${expiredInvoices.length} expired invoice PDFs`
+      `[Cron] Invoice cleanup complete. Success: ${success.length}, Failed: ${failed.length}`
     );
   } catch (err) {
-    console.error("[Cron] Invoice cleanup error:", err.message);
+    console.error('[Cron] Invoice cleanup error:', err.message);
   }
 });

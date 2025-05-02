@@ -1,4 +1,4 @@
-import cloudinary from "../configs/cloudinary.js";
+import cloudinary from '../configs/cloudinary.js';
 
 /**
  * Generates a temporary signed URL for private Cloudinary assets
@@ -8,7 +8,7 @@ import cloudinary from "../configs/cloudinary.js";
  */
 export const getSignedUrl = (
   publicId,
-  resourceType = "image",
+  resourceType = 'image',
   expiresIn = 600
 ) => {
   const timestamp = Math.floor(Date.now() / 1000) + expiresIn;
@@ -19,11 +19,11 @@ export const getSignedUrl = (
 
   const url = cloudinary.utils.url(publicId, {
     resource_type: resourceType,
-    type: "authenticated",
+    type: 'authenticated',
     sign_url: true,
     secure: true,
     timestamp,
-    signature,
+    signature
   });
 
   return url;

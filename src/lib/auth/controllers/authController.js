@@ -1,8 +1,9 @@
-import crypto from "crypto";
-import User from "../User.js";
-import { hashPassword, comparePassword } from "../../../utils/bcryptUtils.js";
-import generateToken from "../../../utils/generateToken.js";
-import { sendEmail } from "../../../utils/sendEmail.js";
+import crypto from 'crypto';
+import User from '../User.js';
+import { hashPassword, comparePassword } from '../../../utils/bcryptUtils.js';
+import generateToken from '../../../utils/generateToken.js';
+import { sendEmail } from '../../../utils/sendEmail.js';
+import { FRONTEND_URL } from '../../../configs/environmentConfig.js';
 
 // Register or Login user
 export const registerUser = async (req, res) => {
@@ -10,7 +11,7 @@ export const registerUser = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ message: "All fields are required" });
+      return res.status(400).json({ message: 'All fields are required' });
     }
 
     let user = await User.findOne({ email });
@@ -20,17 +21,17 @@ export const registerUser = async (req, res) => {
       const isPasswordMatch = await comparePassword(password, user.password);
 
       if (!isPasswordMatch) {
-        return res.status(401).json({ message: "Password not matched" });
+        return res.status(401).json({ message: 'Password not matched' });
       }
 
       return res.status(200).json({
-        message: "User already exists. Logged in successfully.",
+        message: 'User already exists. Logged in successfully.',
         token: generateToken(user._id),
         user: {
           id: user._id,
           email: user.email,
-          role: user.role,
-        },
+          role: user.role
+        }
       });
     }
 
@@ -39,23 +40,23 @@ export const registerUser = async (req, res) => {
     user = await User.create({
       email,
       password: hashedPassword,
-      role: "Employee", // Default role for all new users
+      role: 'Employee' // Default role for all new users
     });
 
     return res.status(201).json({
-      message: "Registration successful",
+      message: 'Registration successful',
       token: generateToken(user._id),
       user: {
         id: user._id,
         email: user.email,
-        role: user.role,
-      },
+        role: user.role
+      }
     });
   } catch (error) {
-    console.error("Error in registerUser:", error.message);
+    console.error('Error in registerUser:', error.message);
     return res.status(500).json({
-      message: "Something went wrong",
-      error: error.message,
+      message: 'Something went wrong',
+      error: error.message
     });
   }
 };
@@ -64,15 +65,15 @@ export const registerUser = async (req, res) => {
 export const getLoggedInUser = async (req, res) => {
   try {
     if (!req.user) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: 'Unauthorized' });
     }
 
     return res.status(200).json(req.user);
   } catch (error) {
-    console.error("Error in getLoggedInUser:", error.message);
+    console.error('Error in getLoggedInUser:', error.message);
     return res.status(500).json({
-      message: "Failed to get user",
-      error: error.message,
+      message: 'Failed to get user',
+      error: error.message
     });
   }
 };
@@ -81,32 +82,32 @@ export const getLoggedInUser = async (req, res) => {
 export const forgotPassword = async (req, res) => {
   const { email } = req.body;
 
-  if (!email) return res.status(400).json({ message: "Email is required" });
+  if (!email) return res.status(400).json({ message: 'Email is required' });
 
   const user = await User.findOne({ email });
-  if (!user) return res.status(404).json({ message: "User not found" });
+  if (!user) return res.status(404).json({ message: 'User not found' });
 
   const resetToken = user.getResetPasswordToken();
   await user.save();
 
-  const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+  const resetUrl = `${FRONTEND_URL}/reset-password/${resetToken}`;
   const message = `You requested a password reset. Please click on below link: \n\n ${resetUrl}`;
 
   try {
     await sendEmail({
       to: user.email,
-      subject: "Password Reset Request",
-      text: message,
+      subject: 'Password Reset Request',
+      text: message
     });
 
-    res.status(200).json({ message: "Reset link sent to email." });
+    res.status(200).json({ message: 'Reset link sent to email.' });
   } catch (err) {
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
     await user.save();
     res
       .status(500)
-      .json({ message: "Failed to send email", error: err.message });
+      .json({ message: 'Failed to send email', error: err.message });
   }
 };
 
@@ -115,23 +116,20 @@ export const resetPassword = async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
 
-  const hashedToken = crypto
-    .createHash("sha256")
-    .update(token)
-    .digest("hex");
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
   const user = await User.findOne({
     resetPasswordToken: hashedToken,
-    resetPasswordExpire: { $gt: Date.now() },
+    resetPasswordExpire: { $gt: Date.now() }
   });
 
   if (!user)
-    return res.status(400).json({ message: "Invalid or expired token" });
+    return res.status(400).json({ message: 'Invalid or expired token' });
 
   user.password = await hashPassword(password);
   user.resetPasswordToken = undefined;
   user.resetPasswordExpire = undefined;
   await user.save();
 
-  res.status(200).json({ message: "Password reset successful" });
+  res.status(200).json({ message: 'Password reset successful' });
 };

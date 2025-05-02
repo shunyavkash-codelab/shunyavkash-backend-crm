@@ -1,18 +1,18 @@
-import puppeteer from "puppeteer-core";
-import fs from "fs/promises";
-import os from "os";
-import path from "path";
-import { v4 as uuidv4 } from "uuid";
+import puppeteer from 'puppeteer-core';
+import fs from 'fs/promises';
+import os from 'os';
+import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 
-export const generatePDFFileObject = async (htmlContent) => {
+export const generatePDFFileObject = async htmlContent => {
   let browser = null;
   try {
     // Try to launch with Chrome first
     const chromePaths = [
-      "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", // macOS
-      "/usr/bin/google-chrome", // Linux
-      "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe", // Windows
-      "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+      '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', // macOS
+      '/usr/bin/google-chrome', // Linux
+      'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', // Windows
+      'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe'
     ];
 
     // Find the first available Chrome path
@@ -29,8 +29,8 @@ export const generatePDFFileObject = async (htmlContent) => {
 
     // Launch options
     const launchOptions = {
-      headless: "new",
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      headless: 'new',
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
     };
 
     // Add executable path if found
@@ -39,7 +39,7 @@ export const generatePDFFileObject = async (htmlContent) => {
     }
 
     // Launch browser
-    console.log("Launching browser with options:", launchOptions);
+    console.log('Launching browser with options:', launchOptions);
     browser = await puppeteer.launch(launchOptions);
 
     // Create page and set content
@@ -49,21 +49,21 @@ export const generatePDFFileObject = async (htmlContent) => {
     await page.setViewport({
       width: 1200,
       height: 1600,
-      deviceScaleFactor: 1,
+      deviceScaleFactor: 1
     });
 
     // Set content with timeout handling
     await page.setContent(htmlContent, {
-      waitUntil: "networkidle0",
-      timeout: 30000, // 30 second timeout
+      waitUntil: 'networkidle0',
+      timeout: 30000 // 30 second timeout
     });
 
     // Generate PDF with consistent settings
     const pdfBuffer = await page.pdf({
-      format: "A4",
+      format: 'A4',
       printBackground: true,
-      margin: { top: "20px", right: "20px", bottom: "20px", left: "20px" },
-      preferCSSPageSize: true,
+      margin: { top: '20px', right: '20px', bottom: '20px', left: '20px' },
+      preferCSSPageSize: true
     });
 
     await browser.close();
@@ -80,18 +80,18 @@ export const generatePDFFileObject = async (htmlContent) => {
     // Return file object compatible with Cloudinary upload
     return {
       path: tempPath,
-      mimetype: "application/pdf",
-      originalname: filename,
+      mimetype: 'application/pdf',
+      originalname: filename
     };
   } catch (error) {
-    console.error("PDF generation error:", error);
+    console.error('PDF generation error:', error);
 
     // Always ensure browser is closed
     if (browser) {
       try {
         await browser.close();
       } catch (e) {
-        console.error("Error closing browser:", e);
+        console.error('Error closing browser:', e);
       }
     }
 

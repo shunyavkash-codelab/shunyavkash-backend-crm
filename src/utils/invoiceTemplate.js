@@ -1,42 +1,42 @@
 export const generateInvoiceHTML = (invoice, client, timesheets) => {
-  console.log("Generating invoice HTML with:");
+  console.log('Generating invoice HTML with:');
   console.log(`- Invoice ID: ${invoice._id}`);
-  console.log(`- Client: ${client?.name || "No client name"}`);
+  console.log(`- Client: ${client?.name || 'No client name'}`);
   console.log(`- Timesheets: ${timesheets?.length || 0} items`);
 
   if (timesheets && timesheets.length > 0) {
     console.log(
-      "First timesheet project check:",
+      'First timesheet project check:',
       timesheets[0].project
         ? `Project exists: ${timesheets[0].project.title}`
-        : "Project is missing"
+        : 'Project is missing'
     );
 
     console.log(
-      "First timesheet employee check:",
+      'First timesheet employee check:',
       timesheets[0].employee
         ? `Employee exists: ${timesheets[0].employee.firstName}`
-        : "Employee is missing"
+        : 'Employee is missing'
     );
   }
 
   // Updated Timesheet Rows
   const timesheetRows = timesheets
-    .map((ts) => {
+    .map(ts => {
       const formattedDate = ts.date
         ? new Date(ts.date).toISOString().slice(0, 10)
-        : "N/A";
+        : 'N/A';
 
-      let projectName = "Not Assigned";
-      if (ts.project && typeof ts.project === "object") {
-        projectName = ts.project.title || "Untitled Project";
-      } else if (typeof ts.project === "string") {
-        projectName = "Unpopulated Project (ID only)";
+      let projectName = 'Not Assigned';
+      if (ts.project && typeof ts.project === 'object') {
+        projectName = ts.project.title || 'Untitled Project';
+      } else if (typeof ts.project === 'string') {
+        projectName = 'Unpopulated Project (ID only)';
       }
 
-      const description = ts.description || "No description";
+      const description = ts.description || 'No description';
       const hours =
-        typeof ts.hoursWorked === "number" ? ts.hoursWorked.toFixed(2) : "0.00";
+        typeof ts.hoursWorked === 'number' ? ts.hoursWorked.toFixed(2) : '0.00';
 
       return `
       <tr>
@@ -47,7 +47,7 @@ export const generateInvoiceHTML = (invoice, client, timesheets) => {
         <td>${hours}</td>
       </tr>`;
     })
-    .join("");
+    .join('');
 
   const issuedDateStr = invoice.issuedDate
     ? new Date(invoice.issuedDate).toDateString()
@@ -55,7 +55,7 @@ export const generateInvoiceHTML = (invoice, client, timesheets) => {
 
   const dueDateStr = invoice.dueDate
     ? new Date(invoice.dueDate).toDateString()
-    : "N/A";
+    : 'N/A';
 
   return `
     <!DOCTYPE html>
@@ -63,7 +63,7 @@ export const generateInvoiceHTML = (invoice, client, timesheets) => {
       <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Invoice ${invoice._id || ""}</title>
+        <title>Invoice ${invoice._id || ''}</title>
         <style>
           body {
             font-family: Arial, sans-serif;
@@ -128,7 +128,7 @@ export const generateInvoiceHTML = (invoice, client, timesheets) => {
       <body>
         <div class="invoice-header">
           <h1>INVOICE</h1>
-          <p><strong>Invoice ID:</strong> ${invoice._id || "N/A"}</p>
+          <p><strong>Invoice ID:</strong> ${invoice._id || 'N/A'}</p>
         </div>
 
         <div class="invoice-info">
@@ -143,17 +143,17 @@ export const generateInvoiceHTML = (invoice, client, timesheets) => {
           
           <div>
             <h3>Bill To:</h3>
-            <p><strong>${client?.name || "N/A"}</strong><br>
-            Billing Address: ${client?.billingAddress || "N/A"}<br>
-            Email: ${client?.email || "N/A"}<br>
-            Phone: ${client?.phone || "N/A"}</p>
+            <p><strong>${client?.name || 'N/A'}</strong><br>
+            Billing Address: ${client?.billingAddress || 'N/A'}<br>
+            Email: ${client?.email || 'N/A'}<br>
+            Phone: ${client?.phone || 'N/A'}</p>
           </div>
           
           <div>
             <h3>Invoice Details:</h3>
             <p><strong>Issued Date:</strong> ${issuedDateStr}<br>
             <strong>Due Date:</strong> ${dueDateStr}<br>
-            <strong>Status:</strong> ${invoice.status || "Draft"}</p>
+            <strong>Status:</strong> ${invoice.status || 'Draft'}</p>
           </div>
         </div>
 
@@ -169,20 +169,22 @@ export const generateInvoiceHTML = (invoice, client, timesheets) => {
             </tr>
           </thead>
           <tbody>
-            ${timesheetRows ||
-              '<tr><td colspan="5">No timesheet data available</td></tr>'}
+            ${
+              timesheetRows ||
+              '<tr><td colspan="5">No timesheet data available</td></tr>'
+            }
           </tbody>
         </table>
 
         <table class="summary">
           <tr><td><strong>Total Hours:</strong></td><td>${
-            invoice.totalHours ? invoice.totalHours.toFixed(2) : "0.00"
+            invoice.totalHours ? invoice.totalHours.toFixed(2) : '0.00'
           }</td></tr>
           <tr><td><strong>Rate Per Hour:</strong></td><td>$${
-            invoice.ratePerHour ? invoice.ratePerHour.toFixed(2) : "0.00"
+            invoice.ratePerHour ? invoice.ratePerHour.toFixed(2) : '0.00'
           }</td></tr>
           <tr><td><strong>Total Amount Due:</strong></td><td>$${
-            invoice.totalAmount ? invoice.totalAmount.toFixed(2) : "0.00"
+            invoice.totalAmount ? invoice.totalAmount.toFixed(2) : '0.00'
           }</td></tr>
         </table>
         

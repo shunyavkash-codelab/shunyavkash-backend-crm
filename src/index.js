@@ -1,24 +1,19 @@
-import "dotenv/config";
-
-import express from "express";
-import connectDB from "./configs/db.js";
-import mainRoutes from "./router.js";
-import corsMiddleware from "./middlewares/corsMiddleware.js";
-import "./cronJobs/invoiceCleanup.js";
+import 'dotenv/config';
+import express from 'express';
+import connectDB from './configs/db.js';
+import router from './router.js';
+import corsMiddleware from './middlewares/corsMiddleware.js';
+import './cronJobs/invoiceCleanup.js';
+import { PORT } from './configs/environmentConfig.js';
 
 const app = express();
 app.use(corsMiddleware);
-const PORT = process.env.PORT || 5000;
 app.use(express.json());
-// connectDB();
 
-app.use("/api", mainRoutes);
+// Router
+app.use('/api', router);
 
-app.get("/", (req, res) => {
-  res.send("CRM API is running...");
-});
-
-app.listen(PORT, async () => {
+app.listen(PORT || 5000, async () => {
   await connectDB();
   console.log(`Server running on http://localhost:${PORT}`);
 });
