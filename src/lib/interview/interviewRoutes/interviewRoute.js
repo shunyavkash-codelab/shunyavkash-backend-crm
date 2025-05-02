@@ -7,11 +7,11 @@ import {
   updateInterview,
   deleteInterview
 } from '../controllers/interviewController.js';
-import protect from '../../../middlewares/auth.middleware.js';
+import { auth } from '../../../middlewares/auth.middleware.js';
 import authorizeRoles from '../../../middlewares/role.middleware.js';
 
 const router = express.Router();
-router.use(protect);
+router.use(auth);
 
 router.get('/', authorizeRoles('HR', 'Admin', 'Employee'), getAllInterviews);
 router.get('/:id', authorizeRoles('HR', 'Admin', 'Employee'), getInterviewById);

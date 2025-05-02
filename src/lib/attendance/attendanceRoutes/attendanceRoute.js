@@ -7,24 +7,24 @@ import {
   getAttendanceByEmployee,
   deleteAttendance
 } from '../controllers/attendanceController.js';
-import protect from '../../../middlewares/auth.middleware.js';
+import { auth } from '../../../middlewares/auth.middleware.js';
 import authorizeRoles from '../../../middlewares/role.middleware.js';
 
 const router = express.Router();
 
-router.post('/check-in', protect, checkIn);
-router.post('/check-out', protect, checkOut);
+router.post('/check-in', auth, checkIn);
+router.post('/check-out', auth, checkOut);
 
 // Mark Leave (Admin only)
-router.post('/mark-leave', protect, authorizeRoles('admin'), markLeave);
+router.post('/mark-leave', auth, authorizeRoles('admin'), markLeave);
 
 //  Get All Attendance Records (Admin only)
-router.get('/', protect, getAllAttendance);
+router.get('/', auth, getAllAttendance);
 
 // Get Attendance by Employee (Admin or Employee viewing their own)
-router.get('/:employeeId', protect, getAttendanceByEmployee);
+router.get('/:employeeId', auth, getAttendanceByEmployee);
 
 // Delete Attendance Record (Admin only)
-router.delete('/:id', protect, deleteAttendance);
+router.delete('/:id', auth, deleteAttendance);
 
 export default router;

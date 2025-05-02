@@ -7,33 +7,23 @@ import {
   deleteLeave
 } from '../controllers/leaveController.js';
 
-import protect from '../../../middlewares/auth.middleware.js';
+import { auth } from '../../../middlewares/auth.middleware.js';
 import authorizeRoles from '../../../middlewares/role.middleware.js';
 
 const router = express.Router();
 
-router.post(
-  '/',
-  protect,
-  authorizeRoles('Employee', 'Admin', 'HR'),
-  applyLeave
-);
-router.get(
-  '/',
-  protect,
-  authorizeRoles('Employee', 'Admin', 'HR'),
-  getMyLeaves
-);
-router.get('/all', protect, authorizeRoles('Admin', 'HR'), getAllLeaves);
+router.post('/', auth, authorizeRoles('Employee', 'Admin', 'HR'), applyLeave);
+router.get('/', auth, authorizeRoles('Employee', 'Admin', 'HR'), getMyLeaves);
+router.get('/all', auth, authorizeRoles('Admin', 'HR'), getAllLeaves);
 router.put(
   '/status/:id',
-  protect,
+  auth,
   authorizeRoles('Admin', 'HR'),
   updateLeaveStatus
 );
 router.delete(
   '/:id',
-  protect,
+  auth,
   authorizeRoles('Employee', 'Admin', 'HR'),
   deleteLeave
 );

@@ -8,11 +8,11 @@ import {
   deleteTimesheet,
   finalizeTimesheet
 } from '../controllers/timesheetController.js';
-import protect from '../../../middlewares/auth.middleware.js';
+import { auth } from '../../../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
-router.use(protect);
+router.use(auth);
 
 router.post('/', createTimesheet);
 router.get('/', getAllTimesheets);
