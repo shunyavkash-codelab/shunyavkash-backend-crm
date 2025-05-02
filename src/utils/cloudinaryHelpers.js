@@ -1,4 +1,5 @@
 import cloudinary from '../configs/cloudinary.js';
+import logger from './loggerUtils.js';
 
 const getResourceTypeFromPublicId = publicId => {
   return publicId?.endsWith('.pdf') ? 'raw' : 'image';
@@ -18,7 +19,7 @@ export const extractPublicIdFromUrl = url => {
     }
     return null;
   } catch (error) {
-    console.error('Error extracting public ID:', error);
+    logger.error('Error extracting public ID:', error);
     return null;
   }
 };
@@ -56,7 +57,7 @@ export const uploadToCloudinary = async (
 //     });
 //     return result;
 //   } catch (err) {
-//     console.error("Error deleting file from Cloudinary:", err);
+//     logger.error("Error deleting file from Cloudinary:", err);
 //     throw new Error("Failed to delete file from Cloudinary");
 //   }
 // };
@@ -71,7 +72,7 @@ export const deleteFileFromCloudinary = async (publicId, resourceType) => {
     });
     return result;
   } catch (err) {
-    console.error('Error deleting file from Cloudinary:', err);
+    logger.error('Error deleting file from Cloudinary:', err);
     throw new Error('Failed to delete file from Cloudinary');
   }
 };
@@ -80,10 +81,10 @@ export const deleteFileFromCloudinary = async (publicId, resourceType) => {
 // export const safeDeleteFile = async (publicId, resourceType = "image") => {
 //   if (!publicId) return { result: "skipped" };
 //   try {
-//     console.log("Deleting file:", publicId);
+//     logger.log("Deleting file:", publicId);
 //     return await deleteFileFromCloudinary(publicId, resourceType);
 //   } catch (err) {
-//     console.error("Error deleting file:", err);
+//     logger.error("Error deleting file:", err);
 //     return { result: "error", error: err.message };
 //   }
 // };
@@ -92,10 +93,10 @@ export const safeDeleteFile = async (publicId, resourceType) => {
   try {
     const finalResourceType =
       resourceType || getResourceTypeFromPublicId(publicId);
-    console.log(`Deleting file: ${publicId} (Type: ${finalResourceType})`);
+    logger.log(`Deleting file: ${publicId} (Type: ${finalResourceType})`);
     return await deleteFileFromCloudinary(publicId, finalResourceType);
   } catch (err) {
-    console.error('Error deleting file:', err);
+    logger.error('Error deleting file:', err);
     return { result: 'error', error: err.message };
   }
 };

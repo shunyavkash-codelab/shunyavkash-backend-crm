@@ -1,6 +1,7 @@
 import cron from 'node-cron';
 import Invoice from '../lib/invoice/Invoice.js';
 import { safeDeleteFile } from '../utils/cloudinaryHelpers.js';
+import logger from '../utils/loggerUtils.js';
 
 // Schedule: Runs every day at midnight (server time)
 cron.schedule('0 0 * * *', async () => {
@@ -12,7 +13,7 @@ cron.schedule('0 0 * * *', async () => {
       cloudinaryPublicId: { $ne: null }
     });
     if (!expiredInvoices.length) {
-      console.log('[Cron] No expired invoices found for cleanup.');
+      logger.log('[Cron] No expired invoices found for cleanup.');
       return;
     }
     const results = await Promise.allSettled(
@@ -35,10 +36,10 @@ cron.schedule('0 0 * * *', async () => {
     const success = results.filter(r => r.status === 'fulfilled');
     const failed = results.filter(r => r.status === 'rejected');
 
-    console.log(
+    logger.log(
       `[Cron] Invoice cleanup complete. Success: ${success.length}, Failed: ${failed.length}`
     );
   } catch (err) {
-    console.error('[Cron] Invoice cleanup error:', err.message);
+    logger.error('[Cron] Invoice cleanup error:', err.message);
   }
 });

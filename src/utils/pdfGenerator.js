@@ -3,6 +3,7 @@ import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import logger from './loggerUtils.js';
 
 export const generatePDFFileObject = async htmlContent => {
   let browser = null;
@@ -39,7 +40,7 @@ export const generatePDFFileObject = async htmlContent => {
     }
 
     // Launch browser
-    console.log('Launching browser with options:', launchOptions);
+    logger.log('Launching browser with options:', launchOptions);
     browser = await puppeteer.launch(launchOptions);
 
     // Create page and set content
@@ -74,7 +75,7 @@ export const generatePDFFileObject = async htmlContent => {
     const tempPath = path.join(os.tmpdir(), filename);
 
     // Write to file
-    console.log(`Writing PDF to temp file: ${tempPath}`);
+    logger.log(`Writing PDF to temp file: ${tempPath}`);
     await fs.writeFile(tempPath, pdfBuffer);
 
     // Return file object compatible with Cloudinary upload
@@ -84,14 +85,14 @@ export const generatePDFFileObject = async htmlContent => {
       originalname: filename
     };
   } catch (error) {
-    console.error('PDF generation error:', error);
+    logger.error('PDF generation error:', error);
 
     // Always ensure browser is closed
     if (browser) {
       try {
         await browser.close();
       } catch (e) {
-        console.error('Error closing browser:', e);
+        logger.error('Error closing browser:', e);
       }
     }
 

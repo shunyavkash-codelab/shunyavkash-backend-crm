@@ -9,11 +9,12 @@ import {
   HR_PASSWORD,
   MONGO_URI
 } from '../configs/environmentConfig.js';
+import logger from '../utils/loggerUtils.js';
 
 dotenv.config(); // Load from .env
 
 await mongoose.connect(MONGO_URI);
-console.log('MongoDB connected');
+logger.log('MongoDB connected');
 
 // Predefined users
 const predefinedUsers = [
@@ -44,7 +45,7 @@ for (const userData of predefinedUsers) {
         (await User.findOne({ email: userData.email }));
 
       if (emailTaken) {
-        console.error(
+        logger.error(
           `Cannot update ${userData.role}. Email "${userData.email}" is already in use.`
         );
         continue;
@@ -53,7 +54,7 @@ for (const userData of predefinedUsers) {
       existingUser.email = userData.email;
       existingUser.password = await hashPassword(userData.password);
       await existingUser.save();
-      console.log(`Updated ${userData.role}`);
+      logger.log(`Updated ${userData.role}`);
     }
   } else {
     await User.create({
@@ -61,9 +62,9 @@ for (const userData of predefinedUsers) {
       email: userData.email,
       password: await hashPassword(userData.password)
     });
-    console.log(`Created ${userData.role}`);
+    logger.log(`Created ${userData.role}`);
   }
 }
 
 mongoose.disconnect();
-console.log('🚀 Seeding complete');
+logger.log('🚀 Seeding complete');
