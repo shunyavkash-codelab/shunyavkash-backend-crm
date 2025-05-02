@@ -1,4 +1,4 @@
-import logger from '../../../utils/logger.utils.js';
+import logger from '../../../utils/logger.util.js';
 import Attendance from '../Attendance.js';
 
 // 1. Employee Check-In

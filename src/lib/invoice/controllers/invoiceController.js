@@ -8,7 +8,7 @@ import {
   safeDeleteFile
 } from '../../../utils/cloudinaryHelpers.js';
 import cloudinary from '../../../configs/cloudinary.js';
-import logger from '../../../utils/logger.utils.js';
+import logger from '../../../utils/logger.util.js';
 
 export const checkFileExists = async (publicId, resourceType = 'raw') => {
   try {

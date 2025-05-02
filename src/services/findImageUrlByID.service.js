@@ -6,7 +6,7 @@ import cloudinary from '../configs/cloudinary.js';
  * @param {string} resourceType - 'image' | 'raw' (avatar = image, document = raw)
  * @param {number} expiresIn - URL expiry in seconds (default 10 minutes)
  */
-export const getSignedUrl = (
+export const findImageUrlByID = (
   publicId,
   resourceType = 'image',
   expiresIn = 600

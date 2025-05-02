@@ -1,5 +1,5 @@
 import cloudinary from '../configs/cloudinary.js';
-import logger from './logger.utils.js';
+import logger from './logger.util.js';
 
 const getResourceTypeFromPublicId = publicId => {
   return publicId?.endsWith('.pdf') ? 'raw' : 'image';

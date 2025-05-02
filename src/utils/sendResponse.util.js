@@ -1,4 +1,4 @@
-import logger from './logger.utils.js';
+import logger from './logger.util.js';
 
 export default function SendResponse(
   res,

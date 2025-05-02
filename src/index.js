@@ -6,7 +6,7 @@ import cors from './middlewares/cors.middleware.js';
 import './cronJobs/invoiceCleanup.js';
 import { PORT } from './configs/environmentConfig.js';
 import { requestTimingLogger } from './middlewares/requestTimingLogger.middleware.js';
-import logger from './utils/logger.utils.js';
+import logger from './utils/logger.util.js';
 import errorHandler from './middlewares/errorHandler.middleware.js';
 
 const app = express();

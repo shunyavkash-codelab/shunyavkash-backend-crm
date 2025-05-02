@@ -1,4 +1,4 @@
-import logger from '../../../utils/logger.utils.js';
+import logger from '../../../utils/logger.util.js';
 import Leave from '../Leave.js';
 
 // Apply for leave

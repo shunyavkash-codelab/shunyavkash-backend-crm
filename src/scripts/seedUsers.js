@@ -9,7 +9,7 @@ import {
   HR_PASSWORD,
   MONGO_URI
 } from '../configs/environmentConfig.js';
-import logger from '../utils/loggerUtils.js';
+import logger from '../utils/logger.util.js';
 
 dotenv.config(); // Load from .env
 

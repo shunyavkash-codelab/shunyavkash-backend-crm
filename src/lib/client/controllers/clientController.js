@@ -1,6 +1,6 @@
 import Client from '../Client.js';
 import Project from '../../project/Project.js';
-import logger from '../../../utils/logger.utils.js';
+import logger from '../../../utils/logger.util.js';
 
 // Create Client
 export const createClient = async (req, res) => {

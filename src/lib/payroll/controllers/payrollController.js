@@ -1,6 +1,6 @@
 import Payroll from '../Payroll.js';
 import { generatePayrollData } from '../../../services/payrollGenerator.service.js';
-import logger from '../../../utils/logger.utils.js';
+import logger from '../../../utils/logger.util.js';
 
 // Generate Payroll for an Employee
 export const generatePayroll = async (req, res) => {

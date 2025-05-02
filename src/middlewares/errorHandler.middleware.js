@@ -1,5 +1,5 @@
-import logger from '../utils/logger.utils.js';
-import SendResponse from '../utils/sendResponseUtils.js';
+import logger from '../utils/logger.util.js';
+import SendResponse from '../utils/sendResponse.util.js';
 
 // eslint-disable-next-line no-unused-vars
 export default function errorHandler(err, req, res, next) {

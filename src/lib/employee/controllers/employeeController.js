@@ -7,7 +7,7 @@ import {
   deleteEmployeeDocuments,
   safeDeleteFile
 } from '../../../utils/cloudinaryHelpers.js';
-import logger from '../../../utils/logger.utils.js';
+import logger from '../../../utils/logger.util.js';
 
 // Create Employee
 export const createEmployee = async (req, res) => {

@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import logger from './logger.utils.js';
+import logger from './logger.util.js';
 
 export const generatePDFFileObject = async htmlContent => {
   let browser = null;
