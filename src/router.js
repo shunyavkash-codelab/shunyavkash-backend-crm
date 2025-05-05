@@ -1,6 +1,6 @@
 import express from 'express';
-import authRoutes from './lib/auth/router.js';
-import clientRoutes from './lib/client/clientRoutes/indexRoute.js';
+import { authRoute } from './lib/auth/router.js';
+import { clientRoute } from './lib/client/router.js';
 import projectRoutes from './lib/project/projectRoutes/indexRoute.js';
 import timesheetRoutes from './lib/timesheet/timesheetRoutes/timesheetRoute.js';
 import invoiceRoutes from './lib/invoice/invoiceRoutes/indexRoute.js';
@@ -12,8 +12,8 @@ import payrollRoutes from './lib/payroll/payrollRoutes/indexRoute.js';
 
 const router = express.Router();
 
-router.use('/auth', authRoutes);
-router.use('/client', clientRoutes);
+router.use('/auth', authRoute);
+router.use('/client', clientRoute);
 router.use('/project', projectRoutes);
 router.use('/timesheet', timesheetRoutes);
 router.use('/invoice', invoiceRoutes);

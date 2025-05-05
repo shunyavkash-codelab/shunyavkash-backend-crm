@@ -5,13 +5,13 @@ import { findLoggedInUser } from './controllers/findLoggedInUser.controller.js';
 import { forgotPassword } from './controllers/forgotPassword.controller.js';
 import { resetPassword } from './controllers/resetPassword.controller.js';
 
-const router = express.Router();
+const authRoute = express.Router();
 // remove route end point register
-router.post('/register', registerUser);
-router.get('/me', auth, findLoggedInUser);
+authRoute.post('/register', registerUser);
+authRoute.get('/me', auth, findLoggedInUser);
 
 // Forgot + Reset Password
-router.post('/forgot-password', forgotPassword);
-router.put('/reset-password/:token', resetPassword);
+authRoute.post('/forgot-password', forgotPassword);
+authRoute.put('/reset-password/:token', resetPassword);
 
-export default router;
+export { authRoute };
