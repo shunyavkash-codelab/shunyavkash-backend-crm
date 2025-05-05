@@ -23,6 +23,12 @@ export const createEmployee = async (req, res) => {
       status,
       address,
     } = req.body;
+    const existingEmployee = await Employee.findOne({ email });
+    if (existingEmployee) {
+      return res.status(409).json({
+        message: "An employee with this email already exists.",
+      });
+    }
 
     const avatarFile = processUploadedFile(req.files?.avatar?.[0]);
     const documents = processUploadedFiles(req.files?.documents);
