@@ -11,12 +11,12 @@ import authorizeRoles from "../../../middlewares/roleMiddleware.js";
 import protect from "../../../middlewares/authMiddleware.js";
 
 const router = express.Router();
-router.use(protect);
+// router.use(protect);
 
-router.post("/", authorizeRoles("Admin"), multiUpload, createEmployee);
-router.get("/", authorizeRoles("Admin"), getAllEmployees);
-router.get("/:id", authorizeRoles("Admin"), getEmployeeById);
-router.put("/:id", authorizeRoles("Admin"), multiUpload, updateEmployee);
-router.delete("/:id", authorizeRoles("Admin"), deleteEmployee);
+router.post("/", multiUpload, createEmployee);
+router.get("/", getAllEmployees);
+router.get("/:id", getEmployeeById);
+router.put("/:id", multiUpload, updateEmployee);
+router.delete("/:id", deleteEmployee);
 
 export default router;
