@@ -4,10 +4,11 @@ import SendResponse from '../../../utils/sendResponse.util.js';
 
 export const createClient = async (req, res) => {
   try {
-    if (!req.body) {
-      return SendResponse(res, 400, false, 'Missing required fields');
+    let payload = req.body;
+    if (!payload || Object.keys(payload).length === 0) {
+      return SendResponse(res, 400, false, 'Request body cannot be empty');
     }
-    const client = await Client.create(req.body);
+    const client = await Client.create(payload);
     return SendResponse(res, 201, true, 'Client create successfully', client);
   } catch (error) {
     logger.error('[Create Client Error]:', error);

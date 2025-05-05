@@ -5,26 +5,31 @@ import logger from '../../../utils/logger.util.js';
 
 export const updateClient = async (req, res) => {
   const { id } = req.params;
+  let payload = req.body;
 
   try {
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-      return SendResponse(res, 400, false, 'Invalid or missing Client ID');
+      return SendResponse(res, 400, false, 'Invalid or missing client ID');
     }
 
-    const updatedClient = await Client.findByIdAndUpdate(id, req.body, {
+    if (!payload || Object.keys(payload).length === 0) {
+      return SendResponse(res, 400, false, 'Request body cannot be empty');
+    }
+
+    const updatedClient = await Client.findByIdAndUpdate(id, payload, {
       new: true,
       runValidators: true
     });
 
     if (!updatedClient) {
-      return SendResponse(res, 404, false, 'Client not found');
+      return SendResponse(res, 404, false, 'No client found with the given ID');
     }
 
     return SendResponse(
       res,
       200,
       true,
-      'Client updated successfully',
+      'Client details updated successfully',
       updatedClient
     );
   } catch (error) {
@@ -33,7 +38,7 @@ export const updateClient = async (req, res) => {
       res,
       500,
       false,
-      'Failed to update client',
+      'An error occurred while updating the client',
       error.message || error
     );
   }
