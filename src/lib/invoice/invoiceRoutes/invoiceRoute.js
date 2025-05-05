@@ -6,6 +6,7 @@ import {
   getInvoices,
   updateInvoiceStatus,
   regenerateInvoicePDF,
+  sendInvoiceEmail,
 } from "../controllers/invoiceController.js";
 // import protect from "../../../middlewares/authMiddleware.js";
 // import authorizeRoles from "../../../middlewares/roleMiddleware.js";
@@ -29,5 +30,6 @@ router.post(
 
   regenerateInvoicePDF
 );
+router.post("/:id/send", sendInvoiceEmail);
 
 export default router;

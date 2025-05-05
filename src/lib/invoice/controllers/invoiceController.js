@@ -8,6 +8,7 @@ import {
   safeDeleteFile,
 } from "../../../utils/cloudinaryHelpers.js";
 import cloudinary from "../../../configs/cloudinary.js";
+import { sendEmail } from "../../../utils/sendEmail.js";
 
 export const checkFileExists = async (publicId, resourceType = "raw") => {
   try {
@@ -61,6 +62,7 @@ export const createInvoice = async (req, res) => {
       ratePerHour,
       totalAmount,
       dueDate,
+      status: "Unpaid",
     });
 
     const html = generateInvoiceHTML(invoice, client, timesheets);
@@ -248,20 +250,28 @@ export const updateInvoiceStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    const allowedStatuses = ["Draft", "Finalized", "Paid"];
+    // First get the current invoice
+    const invoice = await Invoice.findById(id);
+    if (!invoice) {
+      return res.status(404).json({ message: "Invoice not found" });
+    }
+
+    // Prevent changing status if already paid
+    if (invoice.status === "Paid") {
+      return res.status(400).json({
+        message: "Cannot change status of a paid invoice",
+      });
+    }
+
+    // Only allow specific status transitions
+    const allowedStatuses = ["Draft", "Unpaid", "Paid"];
     if (!allowedStatuses.includes(status)) {
       return res.status(400).json({ message: "Invalid status value" });
     }
 
-    const invoice = await Invoice.findByIdAndUpdate(
-      id,
-      { status },
-      { new: true }
-    );
-
-    if (!invoice) {
-      return res.status(404).json({ message: "Invoice not found" });
-    }
+    // Update the status
+    invoice.status = status;
+    await invoice.save();
 
     return res.status(200).json(invoice);
   } catch (error) {
@@ -295,5 +305,117 @@ export const deleteInvoice = async (req, res) => {
     return res
       .status(500)
       .json({ message: "Failed to delete invoice", error: error.message });
+  }
+};
+
+// export const sendInvoiceEmail = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const invoice = await Invoice.findById(id)
+//       .populate("client")
+//       .populate({
+//         path: "timesheets",
+//         populate: [
+//           { path: "project", select: "title" },
+//           { path: "employee", select: "firstName lastName" },
+//         ],
+//       });
+
+//     if (!invoice) {
+//       return res.status(404).json({ message: "Invoice not found" });
+//     }
+
+//     if (!invoice.pdfUrl) {
+//       return res
+//         .status(400)
+//         .json({ message: "No PDF available for this invoice" });
+//     }
+
+//     if (invoice.status !== "Paid") {
+//       return res
+//         .status(400)
+//         .json({ message: "Only paid invoices can be sent" });
+//     }
+
+//     // Implement your actual email sending logic here
+//     const emailSent = await sendEmailToClient({
+//       to: invoice.client.billingAddress,
+//       subject: `Invoice #${invoice._id}`,
+//       text: `Please find your invoice attached.`,
+//       attachments: [
+//         {
+//           filename: `invoice_${invoice._id}.pdf`,
+//           path: invoice.pdfUrl,
+//         },
+//       ],
+//     });
+
+//     if (emailSent) {
+//       return res.status(200).json({ message: "Invoice sent successfully" });
+//     } else {
+//       return res.status(500).json({ message: "Failed to send invoice" });
+//     }
+//   } catch (error) {
+//     console.error("Error sending invoice email:", error);
+//     return res
+//       .status(500)
+//       .json({ message: "Failed to send invoice", error: error.message });
+//   }
+// };
+export const sendInvoiceEmail = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const invoice = await Invoice.findById(id)
+      .populate("client")
+      .populate({
+        path: "timesheets",
+        populate: [
+          { path: "project", select: "title" },
+          { path: "employee", select: "firstName lastName" },
+        ],
+      });
+
+    if (!invoice) {
+      return res.status(404).json({ message: "Invoice not found" });
+    }
+
+    if (!invoice.pdfUrl) {
+      return res
+        .status(400)
+        .json({ message: "No PDF available for this invoice" });
+    }
+
+    if (invoice.status !== "Paid") {
+      return res
+        .status(400)
+        .json({ message: "Only paid invoices can be sent" });
+    }
+
+    // Fixed: Use the correct function name
+    const emailResult = await sendEmail({
+      to: invoice.client.email, // Fixed: Using email property instead of billingAddress
+      subject: `Invoice #${invoice._id}`,
+      text: `Please find your invoice attached.`,
+      attachments: [
+        {
+          filename: `invoice_${invoice._id}.pdf`,
+          path: invoice.pdfUrl,
+        },
+      ],
+    });
+
+    if (emailResult.success) {
+      return res.status(200).json({ message: "Invoice sent successfully" });
+    } else {
+      return res.status(500).json({
+        message: "Failed to send invoice",
+        error: emailResult.error,
+      });
+    }
+  } catch (error) {
+    console.error("Error sending invoice email:", error);
+    return res
+      .status(500)
+      .json({ message: "Failed to send invoice", error: error.message });
   }
 };
