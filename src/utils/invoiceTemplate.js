@@ -153,7 +153,7 @@ export const generateInvoiceHTML = (invoice, client, timesheets) => {
             <h3>Invoice Details:</h3>
             <p><strong>Issued Date:</strong> ${issuedDateStr}<br>
             <strong>Due Date:</strong> ${dueDateStr}<br>
-            <strong>Status:</strong> ${invoice.status || "Draft"}</p>
+            <strong>Status:</strong> ${invoice.status || "-"}</p>
           </div>
         </div>
 
@@ -169,8 +169,10 @@ export const generateInvoiceHTML = (invoice, client, timesheets) => {
             </tr>
           </thead>
           <tbody>
-            ${timesheetRows ||
-              '<tr><td colspan="5">No timesheet data available</td></tr>'}
+            ${
+              timesheetRows ||
+              '<tr><td colspan="5">No timesheet data available</td></tr>'
+            }
           </tbody>
         </table>
 

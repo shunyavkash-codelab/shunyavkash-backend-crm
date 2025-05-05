@@ -71,8 +71,8 @@ const invoiceSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["Draft", "Unpaid", "Paid"],
-      default: "Draft",
+      enum: ["Unpaid", "Paid"],
+      default: "Unpaid",
     },
     issuedDate: {
       type: Date,
