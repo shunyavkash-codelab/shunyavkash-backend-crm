@@ -25,9 +25,80 @@ export const checkFileExists = async (publicId, resourceType = "raw") => {
 };
 
 // Create Invoice
+// export const createInvoice = async (req, res) => {
+//   try {
+//     const { clientId, timesheetIds, ratePerHour, dueDate, status } = req.body;
+
+//     if (!clientId || !timesheetIds || !ratePerHour) {
+//       return res.status(400).json({ message: "Missing required fields" });
+//     }
+
+//     const client = await Client.findById(clientId);
+//     if (!client) {
+//       return res.status(404).json({ message: "Client not found" });
+//     }
+
+//     const timesheets = await Timesheet.find({
+//       _id: { $in: timesheetIds },
+//       isFinalized: true,
+//     }).populate([
+//       { path: "project", select: "title" },
+//       // { path: "employee", select: "firstName lastName email" },
+//     ]);
+
+//     if (timesheets.length === 0) {
+//       return res
+//         .status(400)
+//         .json({ message: "No valid finalized timesheets found" });
+//     }
+
+//     const totalHours = timesheets.reduce((sum, ts) => sum + ts.hoursWorked, 0);
+//     const totalAmount = totalHours * ratePerHour;
+
+//     const invoice = await Invoice.create({
+//       client: clientId,
+//       timesheets: timesheetIds,
+//       totalHours,
+//       ratePerHour,
+//       totalAmount,
+//       dueDate,
+//       status: status || "Unpaid",
+//     });
+
+//     const html = generateInvoiceHTML(invoice, client, timesheets);
+//     const fileObject = await generatePDFFileObject(html);
+
+//     const { url, public_id } = await uploadToCloudinary(
+//       fileObject,
+//       "invoices",
+//       {
+//         resource_type: "raw",
+//         format: "pdf",
+//         type: "upload",
+//         tags: ["invoice"],
+//         context: { alt: `Invoice PDF ${invoice._id}` },
+//         invalidate: true,
+//         expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+//       }
+//     );
+
+//     invoice.pdfUrl = url;
+//     invoice.cloudinaryPublicId = public_id;
+//     invoice.pdfExists = true;
+//     await invoice.save();
+
+//     return res.status(201).json(invoice);
+//   } catch (error) {
+//     console.error("Invoice creation error:", error);
+//     return res
+//       .status(500)
+//       .json({ message: "Failed to create invoice", error: error.message });
+//   }
+// };
+// Fix for the createInvoice function
 export const createInvoice = async (req, res) => {
   try {
-    const { clientId, timesheetIds, ratePerHour, dueDate } = req.body;
+    const { clientId, timesheetIds, ratePerHour, dueDate, status } = req.body;
 
     if (!clientId || !timesheetIds || !ratePerHour) {
       return res.status(400).json({ message: "Missing required fields" });
@@ -62,7 +133,7 @@ export const createInvoice = async (req, res) => {
       ratePerHour,
       totalAmount,
       dueDate,
-      status: "Unpaid",
+      status: status || "Unpaid",
     });
 
     const html = generateInvoiceHTML(invoice, client, timesheets);
@@ -250,14 +321,22 @@ export const updateInvoiceStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    // First get the current invoice
-    const invoice = await Invoice.findById(id);
+    const invoice = await Invoice.findById(id)
+      .populate("client")
+      .populate({
+        path: "timesheets",
+        populate: [
+          { path: "project", select: "title" },
+          { path: "employee", select: "firstName lastName" },
+        ],
+      });
+
     if (!invoice) {
       return res.status(404).json({ message: "Invoice not found" });
     }
 
     // Prevent changing status if already paid
-    if (invoice.status === "Paid") {
+    if (invoice.status === "Paid" && status !== "Paid") {
       return res.status(400).json({
         message: "Cannot change status of a paid invoice",
       });
@@ -270,8 +349,47 @@ export const updateInvoiceStatus = async (req, res) => {
     }
 
     // Update the status
+    const oldStatus = invoice.status;
     invoice.status = status;
     await invoice.save();
+
+    // Regenerate PDF if status changed
+    if (oldStatus !== status) {
+      console.log(
+        `Status changed from ${oldStatus} to ${status}. Regenerating PDF...`
+      );
+
+      // Regenerate PDF with new status
+      const html = generateInvoiceHTML(
+        invoice,
+        invoice.client,
+        invoice.timesheets
+      );
+      const fileObject = await generatePDFFileObject(html);
+
+      if (invoice.cloudinaryPublicId) {
+        await safeDeleteFile(invoice.cloudinaryPublicId, "raw");
+      }
+
+      const { url, public_id } = await uploadToCloudinary(
+        fileObject,
+        "invoices",
+        {
+          resource_type: "raw",
+          format: "pdf",
+          type: "upload",
+          tags: ["invoice"],
+          context: { alt: `Invoice PDF ${invoice._id}` },
+          invalidate: true,
+          expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        }
+      );
+
+      invoice.pdfUrl = url;
+      invoice.cloudinaryPublicId = public_id;
+      invoice.pdfExists = true;
+      await invoice.save();
+    }
 
     return res.status(200).json(invoice);
   } catch (error) {
@@ -280,7 +398,6 @@ export const updateInvoiceStatus = async (req, res) => {
       .json({ message: "Failed to update invoice", error: error.message });
   }
 };
-
 // Delete Invoice
 export const deleteInvoice = async (req, res) => {
   try {
@@ -308,63 +425,23 @@ export const deleteInvoice = async (req, res) => {
   }
 };
 
-// export const sendInvoiceEmail = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const invoice = await Invoice.findById(id)
-//       .populate("client")
-//       .populate({
-//         path: "timesheets",
-//         populate: [
-//           { path: "project", select: "title" },
-//           { path: "employee", select: "firstName lastName" },
-//         ],
-//       });
-
-//     if (!invoice) {
-//       return res.status(404).json({ message: "Invoice not found" });
-//     }
-
-//     if (!invoice.pdfUrl) {
-//       return res
-//         .status(400)
-//         .json({ message: "No PDF available for this invoice" });
-//     }
-
-//     if (invoice.status !== "Paid") {
-//       return res
-//         .status(400)
-//         .json({ message: "Only paid invoices can be sent" });
-//     }
-
-//     // Implement your actual email sending logic here
-//     const emailSent = await sendEmailToClient({
-//       to: invoice.client.billingAddress,
-//       subject: `Invoice #${invoice._id}`,
-//       text: `Please find your invoice attached.`,
-//       attachments: [
-//         {
-//           filename: `invoice_${invoice._id}.pdf`,
-//           path: invoice.pdfUrl,
-//         },
-//       ],
-//     });
-
-//     if (emailSent) {
-//       return res.status(200).json({ message: "Invoice sent successfully" });
-//     } else {
-//       return res.status(500).json({ message: "Failed to send invoice" });
-//     }
-//   } catch (error) {
-//     console.error("Error sending invoice email:", error);
-//     return res
-//       .status(500)
-//       .json({ message: "Failed to send invoice", error: error.message });
-//   }
-// };
+//Send invoice to client
 export const sendInvoiceEmail = async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Before populating, get the raw invoice to verify status
+    const rawInvoice = await Invoice.findById(id);
+    if (!rawInvoice) {
+      return res.status(404).json({ message: "Invoice not found" });
+    }
+
+    console.log("Raw invoice status before sending email:", rawInvoice.status);
+    if (rawInvoice.status !== "Paid") {
+      console.log("WARNING: Attempting to send an unpaid invoice!");
+    }
+
+    //  populate for email
     const invoice = await Invoice.findById(id)
       .populate("client")
       .populate({
@@ -375,27 +452,56 @@ export const sendInvoiceEmail = async (req, res) => {
         ],
       });
 
-    if (!invoice) {
-      return res.status(404).json({ message: "Invoice not found" });
-    }
-
     if (!invoice.pdfUrl) {
       return res
         .status(400)
         .json({ message: "No PDF available for this invoice" });
     }
 
-    if (invoice.status !== "Paid") {
-      return res
-        .status(400)
-        .json({ message: "Only paid invoices can be sent" });
+    // Debugging - verify status is still correct after population
+    console.log("Populated invoice status:", invoice.status);
+
+    // Check if we need to regenerate PDF with correct status
+    if (invoice.status === "Paid") {
+      // Regenerate PDF to ensure it has the correct status
+      const html = generateInvoiceHTML(
+        invoice,
+        invoice.client,
+        invoice.timesheets
+      );
+      const fileObject = await generatePDFFileObject(html);
+
+      // Delete old PDF if exists
+      if (invoice.cloudinaryPublicId) {
+        await safeDeleteFile(invoice.cloudinaryPublicId, "raw");
+      }
+
+      const { url, public_id } = await uploadToCloudinary(
+        fileObject,
+        "invoices",
+        {
+          resource_type: "raw",
+          format: "pdf",
+          type: "upload",
+          tags: ["invoice"],
+          context: { alt: `Invoice PDF ${invoice._id}` },
+          invalidate: true,
+          expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        }
+      );
+
+      invoice.pdfUrl = url;
+      invoice.cloudinaryPublicId = public_id;
+      invoice.pdfExists = true;
+      await invoice.save();
+
+      console.log("PDF regenerated with status:", invoice.status);
     }
 
-    // Fixed: Use the correct function name
     const emailResult = await sendEmail({
-      to: invoice.client.email, // Fixed: Using email property instead of billingAddress
-      subject: `Invoice #${invoice._id}`,
-      text: `Please find your invoice attached.`,
+      to: invoice.client.email,
+      subject: `Invoice #${invoice._id} - ${invoice.status}`, // Add status to subject for debugging
+      text: `Please find your invoice attached. Status: ${invoice.status}`, // Add status to body for verification
       attachments: [
         {
           filename: `invoice_${invoice._id}.pdf`,
