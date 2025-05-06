@@ -112,6 +112,7 @@ export const createInvoice = async (req, res) => {
     const timesheets = await Timesheet.find({
       _id: { $in: timesheetIds },
       isFinalized: true,
+      isInvoiced: false,
     }).populate([
       { path: "project", select: "title" },
       // { path: "employee", select: "firstName lastName email" },
@@ -157,6 +158,10 @@ export const createInvoice = async (req, res) => {
     invoice.cloudinaryPublicId = public_id;
     invoice.pdfExists = true;
     await invoice.save();
+    await Timesheet.updateMany(
+      { _id: { $in: timesheetIds } },
+      { $set: { isInvoiced: true } }
+    );
 
     return res.status(201).json(invoice);
   } catch (error) {

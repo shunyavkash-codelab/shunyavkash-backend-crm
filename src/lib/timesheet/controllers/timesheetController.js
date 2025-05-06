@@ -149,7 +149,26 @@ export const updateTimesheet = async (req, res) => {
       .json({ message: "Error updating timesheet", error: err.message });
   }
 };
+// Get uninvoiced timesheets for a project
+export const getAvailableTimesheets = async (req, res) => {
+  try {
+    const { projectId } = req.params;
 
+    const timesheets = await Timesheet.find({
+      project: projectId,
+      isFinalized: true,
+      isInvoiced: false,
+    }).populate([
+      { path: "project", select: "title" },
+      { path: "user", select: "firstName lastName" },
+    ]);
+
+    res.status(200).json(timesheets);
+  } catch (error) {
+    console.error("Error fetching uninvoiced timesheets:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
 // Delete timesheet
 export const deleteTimesheet = async (req, res) => {
   const { id } = req.params;
