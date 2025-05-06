@@ -1,5 +1,5 @@
 import express from 'express';
-import { interviewUpload } from '../../../middlewares/upload.js';
+import { interviewUpload } from '../../../utils/cloudinaryUpload.util.js';
 import {
   createInterview,
   getAllInterviews,
