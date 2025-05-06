@@ -10,11 +10,11 @@ import {
   assignEmployeesToProject,
   removeEmployeeFromProject,
 } from "../controllers/projectController.js";
-import protect from "../../../middlewares/authMiddleware.js";
+import authenticate from "../../../middlewares/authMiddleware.js";
 import authorizeRoles from "../../../middlewares/roleMiddleware.js";
 
 const router = express.Router();
-router.use(protect);
+router.use(authenticate);
 
 router.post("/", authorizeRoles("Admin"), createProject);
 router.get("/", authorizeRoles("Admin"), getAllProjects);

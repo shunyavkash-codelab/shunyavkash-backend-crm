@@ -5,14 +5,14 @@ import {
   getPayrollByEmployee,
   markAsPaid,
 } from "../controllers/payrollController.js";
-import protect from "../../../middlewares/authMiddleware.js";
+import authenticate from "../../../middlewares/authMiddleware.js";
 import authorizeRoles from "../../../middlewares/roleMiddleware.js";
 
-// import { protect } from "../middleware/authMiddleware.js";
+// import { authenticate } from "../middleware/authMiddleware.js";
 // import { authorizeRoles } from "../middleware/roleMiddleware.js";
 
 const router = express.Router();
-router.use(protect);
+router.use(authenticate);
 
 // Admin Only: Generate Payroll
 router.post("/generate", authorizeRoles("Admin"), generatePayroll);
