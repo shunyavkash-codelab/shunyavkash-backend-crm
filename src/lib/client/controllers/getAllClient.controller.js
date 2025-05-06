@@ -15,7 +15,8 @@ export const getAllClients = async (req, res) => {
     let filterClientCount = clients.length;
     apiFeature.pagination();
     clients = await apiFeature.query.clone();
-    const clientCount = await Client.find().countDocuments();
+
+    const clientCount = await Client.countDocuments();
     const totalPage = Math.ceil(filterClientCount / req.query.limit);
     const currentPage = Number(req.query.page) || 1;
 

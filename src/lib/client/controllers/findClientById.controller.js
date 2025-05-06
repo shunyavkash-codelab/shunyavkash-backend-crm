@@ -17,13 +17,9 @@ export const findClientById = async (req, res) => {
       return SendResponse(res, 404, false, 'Client not found');
     }
 
-    return SendResponse(
-      res,
-      200,
-      true,
-      'Client retrieved successfully',
+    return SendResponse(res, 200, true, 'Client retrieved successfully', {
       client
-    );
+    });
   } catch (error) {
     logger.error('[Find Client By ID Error]:', error);
     return SendResponse(

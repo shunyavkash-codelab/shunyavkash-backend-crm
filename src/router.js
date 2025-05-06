@@ -1,7 +1,7 @@
 import express from 'express';
 import { authRoute } from './lib/auth/router.js';
 import { clientRoute } from './lib/client/router.js';
-import projectRoutes from './lib/project/projectRoutes/indexRoute.js';
+import { projectRoute } from './lib/project/router.js';
 import timesheetRoutes from './lib/timesheet/timesheetRoutes/timesheetRoute.js';
 import invoiceRoutes from './lib/invoice/invoiceRoutes/indexRoute.js';
 import employeeRoutes from './lib/employee/employeeRoutes/indexRoute.js';
@@ -14,7 +14,7 @@ const router = express.Router();
 
 router.use('/auth', authRoute);
 router.use('/client', clientRoute);
-router.use('/project', projectRoutes);
+router.use('/project', projectRoute);
 router.use('/timesheet', timesheetRoutes);
 router.use('/invoice', invoiceRoutes);
 router.use('/employee', employeeRoutes);

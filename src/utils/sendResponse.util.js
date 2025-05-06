@@ -12,7 +12,7 @@ export default function SendResponse(
       code: statusCode,
       success: flag,
       message,
-      ...data
+      data
     });
   } catch (error) {
     logger.info(error);
