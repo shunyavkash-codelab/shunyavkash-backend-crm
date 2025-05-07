@@ -15,12 +15,16 @@ const router = express.Router();
 
 router.use(authenticate);
 
-router.post("/", authorizeRoles("Admin"), createTimesheet);
+router.post("/", authorizeRoles("Admin", "Employee"), createTimesheet);
 router.get("/", authorizeRoles("Admin", "Employee"), getAllTimesheets);
 router.get("/:id", authorizeRoles("Admin", "Employee"), getTimesheetById);
 router.put("/:id", authorizeRoles("Admin", "Employee"), updateTimesheet);
 router.delete("/:id", authorizeRoles("Admin"), deleteTimesheet);
 router.put("/:id/finalize", authorizeRoles("Admin"), finalizeTimesheet);
-router.get("/available-timesheets/:projectId", getAvailableTimesheets);
+router.get(
+  "/available-timesheets/:projectId",
+  authorizeRoles("Admin"),
+  getAvailableTimesheets
+);
 
 export default router;

@@ -17,7 +17,8 @@ const router = express.Router();
 router.use(authenticate);
 
 router.post("/", authorizeRoles("Admin"), createProject);
-router.get("/", authorizeRoles("Admin"), getAllProjects);
+// temporary endpoints for testing with - Employee
+router.get("/", authorizeRoles("Admin", "Employee"), getAllProjects);
 router.get("/archived", authorizeRoles("Admin"), getArchivedProjects);
 router.get("/:id", authorizeRoles("Admin", "Employee"), getProjectById);
 router.put("/:id", authorizeRoles("Admin"), updateProject);
