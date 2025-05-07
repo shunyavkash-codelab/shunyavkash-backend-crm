@@ -20,7 +20,11 @@ class ApiFeatures {
       const orConditions = searchFields.map(field => ({
         [field]: keywordRegex
       }));
+      console.log('orConditions', orConditions);
+
       this.query = this.query.find({ $or: orConditions });
+      console.log('this.query', this.query);
+
       logger.log(
         `Search applied on fields: ${searchFields.join(',')} with keyword: ${this.queryStr.search}`
       );
@@ -30,38 +34,29 @@ class ApiFeatures {
 
   filter() {
     const queryCopy = { ...this.queryStr };
-
     const removeFields = ['search', 'page', 'limit', 'sortkey', 'sortorder'];
-
     removeFields.forEach(key => delete queryCopy[key]);
 
-    let mongoQuery = {};
+    let queryObj = {};
 
-    for (let key in queryCopy) {
-      if (queryCopy.hasOwnProperty(key)) {
-        const operatorMatch = key.match(/(.*)\[(gte|lte|gt|lt)\]/);
+    Object.keys(queryCopy).forEach(param => {
+      const match = param.match(/(\w+)\[(gte|gt|lte|lt)\]/);
+      if (match) {
+        const field = match[1];
+        const operator = `$${match[2]}`;
+        if (!queryObj[field]) queryObj[field] = {};
 
-        if (operatorMatch) {
-          const field = operatorMatch[1];
-          const operator = `$${operatorMatch[2]}`;
-          const value = queryCopy[key];
+        const value = this.isValidDate(queryCopy[param])
+          ? new Date(queryCopy[param])
+          : queryCopy[param];
 
-          if (this.isValidDate(value)) {
-            mongoQuery[field] = mongoQuery[field] || {};
-            mongoQuery[field][operator] = new Date(value);
-          } else {
-            mongoQuery[field] = mongoQuery[field] || {};
-            mongoQuery[field][operator] = value;
-          }
-
-          delete queryCopy[key];
-        }
+        queryObj[field][operator] = value;
+      } else {
+        queryObj[param] = queryCopy[param];
       }
-    }
+    });
 
-    logger.log('Generated MongoDB Query:', mongoQuery);
-
-    this.query = this.query.find(mongoQuery);
+    this.query = this.query.find(queryObj);
     return this;
   }
 
