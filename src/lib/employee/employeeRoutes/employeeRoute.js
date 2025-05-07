@@ -13,10 +13,10 @@ import authenticate from "../../../middlewares/authMiddleware.js";
 const router = express.Router();
 router.use(authenticate);
 
-router.post("/", multiUpload, createEmployee);
+router.post("/", authorizeRoles("Admin", "HR"), multiUpload, createEmployee);
 router.get("/", getAllEmployees);
 router.get("/:id", getEmployeeById);
 router.put("/:id", multiUpload, updateEmployee);
-router.delete("/:id", deleteEmployee);
+router.delete("/:id", authorizeRoles("Admin", "HR"), deleteEmployee);
 
 export default router;
