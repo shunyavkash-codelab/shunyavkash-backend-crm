@@ -101,6 +101,15 @@ export const updateEmployee = async (req, res) => {
     if (!employee) {
       return res.status(404).json({ message: "Employee not found" });
     }
+    // Only admin or the employee themself can update
+    if (
+      !["Admin", "HR"].includes(req.user.role) &&
+      req.user.email !== employee.email
+    ) {
+      return res.status(403).json({
+        message: "You are not authorized to update this employee",
+      });
+    }
 
     const updatedData = { ...req.body };
 
@@ -160,6 +169,15 @@ export const deleteEmployee = async (req, res) => {
       return res.status(404).json({ message: "Employee not found" });
     }
 
+    //  Only admin or the employee themself can delete
+    if (
+      !["Admin", "HR"].includes(req.user.role) &&
+      req.user.email !== employee.email
+    ) {
+      return res.status(403).json({
+        message: "You are not authorized to delete this employee",
+      });
+    }
     // Correct nested search without unnecessary ObjectId cast
     const assignedProjects = await Project.find({
       "assignedEmployees.employee": employee._id,

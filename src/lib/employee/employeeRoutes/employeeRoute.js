@@ -11,7 +11,7 @@ import authorizeRoles from "../../../middlewares/roleMiddleware.js";
 import authenticate from "../../../middlewares/authMiddleware.js";
 
 const router = express.Router();
-// router.use(authenticate);
+router.use(authenticate);
 
 router.post("/", multiUpload, createEmployee);
 router.get("/", getAllEmployees);
