@@ -55,7 +55,7 @@ export const getAllInvoices = async (req, res) => {
     const currentPage = Number(req.query.page) || 1;
 
     return SendResponse(res, 200, true, 'Get all client successfully', {
-      invoicesWithPdfStatus,
+      invoices: invoicesWithPdfStatus,
       totalCount: invoicesCount,
       currentPage,
       filterInvoicesCount,
