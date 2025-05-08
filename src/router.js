@@ -5,7 +5,7 @@ import { projectRoute } from './lib/project/router.js';
 import { timesheetRoute } from './lib/timesheet/router.js';
 import { invoiceRoute } from './lib/invoice/router.js';
 import { employeeRoute } from './lib/employee/router.js';
-import leaveRoutes from './lib/leave/leaveRoutes/indexRoute.js';
+import { leaveRoute } from './lib/leave/router.js';
 import interviewRoutes from './lib/interview/interviewRoutes/indexRoute.js';
 import attendanceRoutes from './lib/attendance/attendanceRoutes/indexRoute.js';
 import payrollRoutes from './lib/payroll/payrollRoutes/indexRoute.js';
@@ -17,10 +17,10 @@ router.use('/client', clientRoute);
 router.use('/project', projectRoute);
 router.use('/timesheet', timesheetRoute);
 router.use('/invoice', invoiceRoute);
-
 router.use('/employee', employeeRoute);
 
-router.use('/leave', leaveRoutes);
+router.use('/leave', leaveRoute);
+
 router.use('/interview', interviewRoutes);
 router.use('/attendance', attendanceRoutes);
 router.use('/payroll', payrollRoutes);
