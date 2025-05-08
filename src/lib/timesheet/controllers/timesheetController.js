@@ -40,29 +40,6 @@ export const createTimesheet = async (req, res) => {
 };
 
 // Get all timesheets
-// Working
-// export const getAllTimesheets = async (req, res) => {
-//   try {
-//     const timesheets = await Timesheet.find({
-//       $or: [{ user: req.user._id }, { user: null }],
-//     })
-//       .populate("user", "firstName lastName email role")
-//       .populate("project", "title")
-//       .sort({ date: -1 }); // Newest first
-
-//     // console.log("backend timesheets:", timesheets);
-//     return res.status(200).json(timesheets);
-//   } catch (err) {
-//     console.error("Error fetching timesheets:", err);
-//     return res.status(500).json({
-//       message: "Error fetching timesheets",
-//       error: err.message,
-//     });
-//   }
-// };
-
-// Testing
-// Get all timesheets
 export const getAllTimesheets = async (req, res) => {
   try {
     let timesheetQuery = {};
