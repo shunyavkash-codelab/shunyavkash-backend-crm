@@ -107,7 +107,7 @@ export const getAllAttendance = async (req, res) => {
   }
 };
 
-// 5. Get Attendance by Employee
+// 5. Get Attendance by Employee findAttendanceByEmployee
 export const getAttendanceByEmployee = async (req, res) => {
   try {
     const { employeeId } = req.params;
