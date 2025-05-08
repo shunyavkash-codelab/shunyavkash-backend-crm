@@ -12,7 +12,7 @@ export const generateAssignmentEmail = (employeeName, projectTitle, role) => {
         <p style="font-size: 15px; color: #6B7280; margin-bottom: 24px;">
           Please log in to the CRM portal to view more details.
         </p>
-        <a href="https://your-crm-link.com/projects" 
+        <a href="http://localhost:5173/dashboard#:~:text=Clients-,Projects,-Timesheet" 
            style="display: inline-block; padding: 12px 24px; background-color: #2563EB; color: #FFFFFF; text-decoration: none; border-radius: 6px; font-weight: 500;">
           View Project
         </a>
