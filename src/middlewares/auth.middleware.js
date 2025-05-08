@@ -1,4 +1,4 @@
-import User from '../lib/auth/User.js';
+import User from '../lib/account/User.js';
 import { JWT_SECRET } from '../configs/environmentConfig.js';
 import { verifyToken } from '../utils/jwt.util.js';
 import SendResponse from '../utils/sendResponse.util.js';

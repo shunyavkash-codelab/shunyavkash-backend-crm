@@ -11,12 +11,11 @@ import {
 } from '../configs/environmentConfig.js';
 import logger from '../utils/logger.util.js';
 
-dotenv.config(); // Load from .env
+dotenv.config();
 
 await mongoose.connect(MONGO_URI);
 logger.log('MongoDB connected');
 
-// Predefined users
 const predefinedUsers = [
   {
     role: 'Admin',

@@ -1,5 +1,5 @@
 import express from 'express';
-import { authRoute } from './lib/auth/router.js';
+import { authRoute } from './lib/account/account.router.js';
 import { clientRoute } from './lib/client/router.js';
 import { projectRoute } from './lib/project/router.js';
 import { timesheetRoute } from './lib/timesheet/router.js';
