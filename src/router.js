@@ -3,7 +3,7 @@ import { authRoute } from './lib/auth/router.js';
 import { clientRoute } from './lib/client/router.js';
 import { projectRoute } from './lib/project/router.js';
 import { timesheetRoute } from './lib/timesheet/router.js';
-import invoiceRoutes from './lib/invoice/invoiceRoutes/indexRoute.js';
+import { invoiceRoute } from './lib/invoice/router.js';
 import employeeRoutes from './lib/employee/employeeRoutes/indexRoute.js';
 import leaveRoutes from './lib/leave/leaveRoutes/indexRoute.js';
 import interviewRoutes from './lib/interview/interviewRoutes/indexRoute.js';
@@ -16,7 +16,8 @@ router.use('/auth', authRoute);
 router.use('/client', clientRoute);
 router.use('/project', projectRoute);
 router.use('/timesheet', timesheetRoute);
-router.use('/invoice', invoiceRoutes);
+router.use('/invoice', invoiceRoute);
+
 router.use('/employee', employeeRoutes);
 router.use('/leave', leaveRoutes);
 router.use('/interview', interviewRoutes);
