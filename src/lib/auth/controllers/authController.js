@@ -90,16 +90,83 @@ export const forgotPassword = async (req, res) => {
   await user.save();
 
   const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
-  const message = `You requested a password reset. Please click on below link: \n\n ${resetUrl}`;
+  // const message = `You requested a password reset. Please click on below link: \n\n ${resetUrl}`;
+  const message = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Password Reset</title>
+  <style>
+    body {
+      background-color: #f4f6f8;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      padding: 20px;
+      margin: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 40px 30px;
+      border-radius: 8px;
+      box-shadow: 0px 2px 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .logo {
+      width: 120px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 24px;
+      color: #333333;
+      margin-bottom: 10px;
+    }
+    p {
+      font-size: 16px;
+      color: #555555;
+      margin-bottom: 30px;
+    }
+    a.button {
+      display: inline-block;
+      padding: 12px 24px;
+      background-color: #4f46e5;
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .footer {
+      margin-top: 30px;
+      font-size: 12px;
+      color: #999999;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="https://res.cloudinary.com/dgm6svyrc/image/upload/v1746685017/shunyavkash-logo_obijb0.png" alt="Shunyavkash" class="logo">
+    <h1>Password Reset Request</h1>
+    <p>We received a request to reset your password. Click the button below to proceed:</p>
+    <a href="${resetUrl}" class="button">Reset Password</a>
+    <p style="margin-top: 20px;">If you didn't request this, you can safely ignore this email.</p>
+    <div class="footer">
+      &copy; ${new Date().getFullYear()} Shunyavkash PVT. LTD. All rights reserved.
+    </div>
+  </div>
+</body>
+</html>
+`;
 
   try {
     await sendEmail({
       to: user.email,
       subject: "Password Reset Request",
-      text: message,
+      html: message,
     });
 
-    res.status(200).json({ message: "Reset link sent to email." });
+    res.status(200).json({ message: "Reset link sent to your email." });
   } catch (err) {
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
