@@ -1,7 +1,7 @@
 import Client from '../Client.js';
 import logger from '../../../utils/logger.util.js';
-import { ApiFeatures } from '../../../utils/apiFeature.util.js';
 import SendResponse from '../../../utils/sendResponse.util.js';
+import { ApiFeatures } from '../../../utils/apifeature.util.js';
 
 export const getAllClients = async (req, res) => {
   try {
