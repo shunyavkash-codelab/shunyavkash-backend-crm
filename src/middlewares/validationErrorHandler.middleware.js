@@ -1,13 +1,7 @@
-export const validationErrorHandler = (err, req, res, next) => {
-  if (err && err.details) {
-    const errorDetails =
-      err.details.body ||
-      err.details.query ||
-      err.details.params ||
-      err.details.headers ||
-      [];
-
-    return res.status(422).json({ errors: errorDetails });
+export const validationErrorHandler = schema => (req, res, next) => {
+  const { error } = schema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ error: error.details[0].message });
   }
-  return next();
+  next();
 };
