@@ -1,14 +1,14 @@
 import express from 'express';
 import { authRoute } from './lib/account/account.router.js';
-import { clientRoute } from './lib/client/router.js';
-import { projectRoute } from './lib/project/router.js';
-import { timesheetRoute } from './lib/timesheet/router.js';
-import { invoiceRoute } from './lib/invoice/router.js';
-import { employeeRoute } from './lib/employee/router.js';
-import { leaveRoute } from './lib/leave/router.js';
-import { interviewRoute } from './lib/interview/router.js';
-import { attendanceRoute } from './lib/attendance/router.js';
-import { payrollRoute } from './lib/payroll/router.js';
+import { clientRoute } from './lib/client/client.router.js';
+import { projectRoute } from './lib/project/project.router.js';
+import { timesheetRoute } from './lib/timesheet/timesheet.router.js';
+import { invoiceRoute } from './lib/invoice/invoice.router.js';
+import { employeeRoute } from './lib/employee/employee.router.js';
+import { leaveRoute } from './lib/leave/leave.router.js';
+import { interviewRoute } from './lib/interview/interview.router.js';
+import { attendanceRoute } from './lib/attendance/attendance.router.js';
+import { payrollRoute } from './lib/payroll/payroll.router.js';
 
 const router = express.Router();
 
