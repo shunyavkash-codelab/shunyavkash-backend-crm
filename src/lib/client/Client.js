@@ -12,10 +12,26 @@ const clientSchema = new mongoose.Schema({
   },
   phone: String,
   billingAddress: String,
+
+  //  NEW FIELDS
+  address: {
+    type: String,
+    required: true,
+  },
+  currency: {
+    type: String,
+    enum: ["USD", "EUR", "INR", "GBP", "AUD"],
+    default: "USD",
+  },
+  industry: {
+    type: String,
+    enum: ["IT", "Healthcare", "Education", "Finance", "Retail", "Other"],
+    required: true,
+  },
+
   createdAt: {
     type: Date,
     default: Date.now,
   },
 });
-
 export default mongoose.models.Client || mongoose.model("Client", clientSchema);
