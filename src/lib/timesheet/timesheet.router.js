@@ -7,15 +7,26 @@ import { updateTimesheet } from './controllers/updateTimeSheet.controller.js';
 import { deleteTimesheet } from './controllers/deleteTimeSheet.controller.js';
 import { finalizeTimesheet } from './controllers/finalizeTimeSheet.controller.js';
 import { getAllTimesheets } from './controllers/getAllTimesheet.controller.js';
+import { createTimesheetSchema } from './validations/createTimesheet.js';
+import { validationErrorHandler } from '../../middlewares/validationErrorHandler.middleware.js';
+import { updateTimesheetSchema } from './validations/updateTimesheet.js';
 
 const timesheetRoute = express.Router();
 
 timesheetRoute.use(auth);
 
-timesheetRoute.post('/', createTimesheet);
+timesheetRoute.post(
+  '/',
+  validationErrorHandler(createTimesheetSchema),
+  createTimesheet
+);
 timesheetRoute.get('/', getAllTimesheets);
 timesheetRoute.get('/:id', findTimesheetById);
-timesheetRoute.put('/:id', updateTimesheet);
+timesheetRoute.put(
+  '/:id',
+  validationErrorHandler(updateTimesheetSchema),
+  updateTimesheet
+);
 timesheetRoute.delete('/:id', deleteTimesheet);
 timesheetRoute.put('/:id/finalize', finalizeTimesheet);
 
