@@ -26,7 +26,7 @@ export const getAllInvoices = async (req, res) => {
 
     if (search) {
       query.$or = [
-        { clientName: { $regex: '^' + search, $options: 'i' } },
+        { 'client.name': { $regex: '^' + search, $options: 'i' } },
         { status: { $regex: '^' + search, $options: 'i' } }
       ];
     }
@@ -71,28 +71,28 @@ export const getAllInvoices = async (req, res) => {
           preserveNullAndEmptyArrays: true
         }
       },
-      {
-        $project: {
-          _id: 1,
-          clientName: '$client.name',
-          clientEmail: '$client.email',
-          timesheets: 1,
-          status: 1,
-          pdfExists: 1,
-          pdfGeneratedAt: 1,
-          pdfUrl: 1,
-          pdfVersion: 1,
-          totalHours: 1,
-          ratePerHour: 1,
-          totalAmount: 1,
-          dueDate: 1,
-          issuedDate: 1,
-          createdAt: 1,
-          updatedAt: 1,
-          cloudinaryPublicId: 1,
-          pdfUrl: 1
-        }
-      },
+      // {
+      //   $project: {
+      //     _id: 1,
+      //     clientName: '$client.name',
+      //     clientEmail: '$client.email',
+      //     timesheets: 1,
+      //     status: 1,
+      //     pdfExists: 1,
+      //     pdfGeneratedAt: 1,
+      //     pdfUrl: 1,
+      //     pdfVersion: 1,
+      //     totalHours: 1,
+      //     ratePerHour: 1,
+      //     totalAmount: 1,
+      //     dueDate: 1,
+      //     issuedDate: 1,
+      //     createdAt: 1,
+      //     updatedAt: 1,
+      //     cloudinaryPublicId: 1,
+      //     pdfUrl: 1
+      //   }
+      // },
       {
         $match: query
       },
@@ -104,8 +104,8 @@ export const getAllInvoices = async (req, res) => {
       {
         $facet: {
           paginatedResults: [
-            { $skip: (parseInt(page) - 1) * parseInt(limit) },
-            { $limit: parseInt(limit) }
+            { $skip: (Number(page) - 1) * Number(limit) },
+            { $limit: Number(limit) }
           ],
           totalCount: [{ $count: 'count' }]
         }
