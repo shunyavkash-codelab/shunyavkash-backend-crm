@@ -182,7 +182,10 @@ export const resetPassword = async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
 
-  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
 
   const user = await User.findOne({
     resetPasswordToken: hashedToken,
@@ -198,4 +201,35 @@ export const resetPassword = async (req, res) => {
   await user.save();
 
   res.status(200).json({ message: "Password reset successful" });
+};
+
+// Verify Password (used before allowing sensitive actions like update/delete)
+export const verifyPassword = async (req, res) => {
+  try {
+    const { password } = req.body;
+    const userId = req.user.id;
+
+    if (!password) {
+      return res.status(400).json({ message: "Password is required" });
+    }
+
+    const user = await User.findById(userId).select("+password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const isMatch = await comparePassword(password, user.password);
+
+    if (!isMatch) {
+      return res.status(401).json({ message: "Incorrect password" });
+    }
+
+    return res.status(200).json({ message: "Password verified successfully" });
+  } catch (error) {
+    console.error("Error in verifyPassword:", error.message);
+    return res
+      .status(500)
+      .json({ message: "Server error", error: error.message });
+  }
 };
